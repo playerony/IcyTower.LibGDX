@@ -1,11 +1,9 @@
 package com.mygdx.game.com.mygdx.game.entities;
 
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Array;
-import com.mygdx.game.com.mygdx.game.enemies.Enemy;
 
 /**
  * Created by pawel_000 on 2016-05-25.
@@ -19,7 +17,7 @@ public class Platform extends Image {
     private static float posX = 0;
     private static float posY = 0;
 
-    private boolean isEnemy = false;
+    private boolean points = true;
 
     private Rectangle bounds;
 
@@ -56,14 +54,14 @@ public class Platform extends Image {
             stage.addActor(b);
     }
 
-    public void setSIZE(int size){
-        this.setWidth(SIZE * WIDTH);
-        SIZE = size;
-    }
-
     public int getSIZE(){
 
         return SIZE;
+    }
+
+    public void setSIZE(int size) {
+        this.setWidth(SIZE * WIDTH);
+        SIZE = size;
     }
 
     public void setPos(Stage stage, float x, float y){
@@ -84,5 +82,13 @@ public class Platform extends Image {
 
         this.setX(x);
         this.setY(y);
+    }
+
+    public boolean isPoints() {
+        return points;
+    }
+
+    public void setPoints(boolean points) {
+        this.points = points;
     }
 }
