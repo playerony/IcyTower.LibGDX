@@ -11,7 +11,11 @@ import com.badlogic.gdx.utils.Array;
  */
 public class Turtle extends Enemy {
     private static final Texture enemyTexture = new Texture("assets/mob_2_green.png");
-
+    private static boolean direction = true;
+    private boolean hide = false;
+    private Animation enemyRunLeft;
+    private Animation enemyRunRight;
+    private Animation enemyDie;
     public Turtle(float x, float y) {
         super(x, y, enemyTexture);
 
@@ -34,7 +38,16 @@ public class Turtle extends Enemy {
             frames.add(region);
         }
 
-        enemyRun = new Animation(0.1f, frames);
+        enemyRunLeft = new Animation(0.1f, frames);
+        frames.clear();
+
+        for (int i = 0; i < 2; i++) {
+            TextureRegion region = new TextureRegion(enemyTexture, i * WIDTH, 0, WIDTH, HEIGHT);
+            region.flip(true, false);
+            frames.add(region);
+        }
+
+        enemyRunRight = new Animation(0.1f, frames);
         frames.clear();
 
         TextureRegion region = new TextureRegion(enemyTexture, 2 * WIDTH, 0, WIDTH, HEIGHT);
@@ -44,13 +57,50 @@ public class Turtle extends Enemy {
         frames.clear();
     }
 
+    public Animation getAnimation() {
+        Animation result = null;
+
+        switch (getState()) {
+            case MOVE: {
+                if (SPEED > 0) {
+                    result = enemyRunRight;
+                } else {
+                    result = enemyRunLeft;
+                }
+            }
+            break;
+
+            case DIE:
+            default:
+                result = enemyDie;
+                break;
+        }
+
+        return result;
+    }
+
+    private State getState() {
+        if (move)
+            return State.MOVE;
+        else
+            return State.DIE;
+    }
+
+    public void oppositeSPEED() {
+        SPEED = -SPEED;
+
+        direction = !direction;
+
+        enem.setAnimation(getAnimation());
+    }
+
     public void update() {
         if (move) {
             this.moveBy(SPEED * Gdx.graphics.getDeltaTime(), 0);
             bounds.setPosition(getX(), getY());
 
-            top.setPosition((int) getX() + 5, (int) getY());
-            bottom.setPosition((int) getX() + 5, (int) getY() - (int) getHeight() + 5);
+            top.setPosition((int) getX(), (int) getY());
+            bottom.setPosition((int) getX() + 1, (int) getY() - (int) getHeight() + 1);
             left.setPosition((int) getX(), (int) getY() - 5);
             right.setPosition((int) getX() + (int) getWidth() - 5, (int) getY() - 5);
 

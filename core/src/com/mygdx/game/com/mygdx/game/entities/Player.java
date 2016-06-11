@@ -287,6 +287,8 @@ public class Player extends Image {
         this.jumpVelocity = velocity;
     }
 
+    //////////// SETTERS
+
     public boolean getDie() {
         return die;
     }
@@ -294,8 +296,6 @@ public class Player extends Image {
     public void setDie(boolean die) {
         this.die = die;
     }
-
-    //////////// SETTERS
 
     public void setJump(boolean jump) {
         this.jump = jump;

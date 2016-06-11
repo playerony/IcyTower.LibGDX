@@ -10,9 +10,9 @@ import com.badlogic.gdx.utils.Array;
  * Created by pawel_000 on 2016-06-09.
  */
 public class Worm extends Enemy {
-
-
     private static final Texture enemyTexture = new Texture("assets/mob_1_red.png");
+    private Animation enemyRun;
+    private Animation enemyDie;
 
     public Worm(float x, float y) {
         super(x, y, enemyTexture);
@@ -46,13 +46,42 @@ public class Worm extends Enemy {
         frames.clear();
     }
 
+    public Animation getAnimation() {
+        Animation result = enemyRun;
+
+        switch (getState()) {
+            case MOVE: {
+                result = enemyRun;
+            }
+            break;
+
+            case DIE:
+            default:
+                result = enemyDie;
+                break;
+        }
+
+        return result;
+    }
+
+    public void oppositeSPEED() {
+        SPEED = -SPEED;
+    }
+
+    private State getState() {
+        if (move)
+            return State.MOVE;
+        else
+            return State.DIE;
+    }
+
     public void update() {
         if (move) {
             this.moveBy(SPEED * Gdx.graphics.getDeltaTime(), 0);
             bounds.setPosition(getX(), getY());
 
-            top.setPosition((int) getX() + 5, (int) getY());
-            bottom.setPosition((int) getX() + 5, (int) getY() - (int) getHeight() + 5);
+            top.setPosition((int) getX(), (int) getY());
+            bottom.setPosition((int) getX() + 1, (int) getY() - (int) getHeight() + 1);
             left.setPosition((int) getX(), (int) getY() - 5);
             right.setPosition((int) getX() + (int) getWidth() - 5, (int) getY() - 5);
 
@@ -60,4 +89,6 @@ public class Worm extends Enemy {
         } else
             enem.setAnimation(enemyDie);
     }
+
+    private enum State {MOVE, DIE}
 }
