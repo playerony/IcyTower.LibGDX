@@ -8,18 +8,18 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.mygdx.game.IcyTower;
+import com.mygdx.game.com.mygdx.game.AssetsManager.Asset;
 
 /**
  * Created by pawel_000 on 2016-05-24.
  */
 public abstract class AbstractScreen implements Screen{
-    protected IcyTower game;
-
-    protected Stage stage;
     public OrthographicCamera camera;
     public OrthographicCamera cameraScore;
-
     public SpriteBatch batch;
+    protected IcyTower game;
+    protected Stage stage;
+    protected Asset assets;
 
     public AbstractScreen(IcyTower game){
         this.game = game;
@@ -28,6 +28,8 @@ public abstract class AbstractScreen implements Screen{
         batch = new SpriteBatch();
         Gdx.input.setInputProcessor(stage);
     }
+
+    protected abstract void init();
 
     private void createCamera() {
         camera = new OrthographicCamera();

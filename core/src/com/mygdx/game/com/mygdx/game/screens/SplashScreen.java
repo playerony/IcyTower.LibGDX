@@ -3,6 +3,7 @@ package com.mygdx.game.com.mygdx.game.screens;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Timer;
 import com.mygdx.game.IcyTower;
+import com.mygdx.game.com.mygdx.game.AssetsManager.Asset;
 
 /**
  * Created by pawel_000 on 2016-05-24.
@@ -22,8 +23,13 @@ public class SplashScreen extends AbstractScreen{
         }, 1);
     }
 
-    private void init(){
-        texture = new Texture("badlogic.jpg");
+    public void init() {
+        assets = new Asset();
+        assets.load();
+        assets.manager.finishLoading();
+
+        if (assets.manager.update())
+            texture = assets.manager.get("assets/logo.png", Texture.class);
     }
 
     @Override

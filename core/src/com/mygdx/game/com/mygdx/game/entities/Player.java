@@ -16,26 +16,34 @@ public class Player extends Image {
 
     private static final int WIDTH = 64;
     private static final int HEIGHT = 64;
-    private static final int START_X = 100;
+    private static final int START_X = 25;
     private static final int START_Y = 0;
     private static final float GRAVITY = -(9.81f * 2.5f);
     public State currentState;
     public Direction direction;
+    public float angle = 0.0f;
     private float jumpVelocity;
     private float runVelocity;
-
     private boolean collision = false;
+    private boolean rotate = false;
     private boolean jump = true;
     private boolean floor = false;
     private boolean die = false;
+    private boolean flip = false;
+
     private Texture playerTexture;
+
     private Animation playerRunRight;
     private Animation playerJumpRight;
     private Animation playerStandingRight;
+    private Animation playerFlipRight;
+
     private Animation playerRunLeft;
     private Animation playerJumpLeft;
     private Animation playerStandingLeft;
+    private Animation playerFlipLeft;
     private Animation playerDie;
+
     private Rectangle bottom;
     private Rectangle top;
     private Rectangle left;
@@ -100,6 +108,14 @@ public class Player extends Image {
 
         playerStandingLeft = new Animation(0.1f, frames);
         frames.clear();
+
+
+        region = new TextureRegion(playerTexture, 7 * 64, 0, 64, 64);
+        region.flip(true, false);
+        frames.add(region);
+
+        playerFlipLeft = new Animation(0.1f, frames);
+        frames.clear();
     }
 
     private void initRightAnimations() {
@@ -133,6 +149,12 @@ public class Player extends Image {
         frames.add(new TextureRegion(playerTexture, 6 * 64, 0, 64, 64));
 
         playerDie = new Animation(0.1f, frames);
+        frames.clear();
+
+
+        frames.add(new TextureRegion(playerTexture, 7 * 64, 0, 64, 64));
+
+        playerFlipRight = new Animation(0.1f, frames);
         frames.clear();
     }
 
@@ -172,6 +194,10 @@ public class Player extends Image {
                     result = playerRunRight;
                     break;
 
+                case FLIP:
+                    result = playerFlipRight;
+                    break;
+
                 case DIE:
                     result = playerDie;
                     break;
@@ -190,6 +216,10 @@ public class Player extends Image {
 
                 case RUNNING:
                     result = playerRunLeft;
+                    break;
+
+                case FLIP:
+                    result = playerFlipLeft;
                     break;
 
                 case DIE:
@@ -213,14 +243,18 @@ public class Player extends Image {
     }
 
     private State getState() {
-        if (runVelocity != 0 && (jumpVelocity == 0 || floor) && !die)
+        if (runVelocity != 0 && (jumpVelocity == 0 || floor) && !die && !flip)
             return State.RUNNING;
 
-        else if (jumpVelocity > 0 && !die)
+        else if (jumpVelocity > 0 && !die && !flip)
             return State.JUMPING;
 
-        else if (jumpVelocity < 0 && !die)
+        else if (jumpVelocity < 0 && !die && !flip)
             return State.FALLING;
+
+        else if (flip) {
+            return State.FLIP;
+        }
 
         else if (die) {
             return State.DIE;
@@ -287,7 +321,15 @@ public class Player extends Image {
         this.jumpVelocity = velocity;
     }
 
+    public boolean getRotate() {
+        return this.rotate;
+    }
+
     //////////// SETTERS
+
+    public void setRotate(boolean rotate) {
+        this.rotate = rotate;
+    }
 
     public boolean getDie() {
         return die;
@@ -305,7 +347,11 @@ public class Player extends Image {
         collision = value;
     }
 
-    private enum State {FALLING, JUMPING, STANDING, RUNNING, DIE}
+    public void setFlip(boolean flip) {
+        this.flip = flip;
+    }
+
+    private enum State {FALLING, JUMPING, FLIP, STANDING, RUNNING, DIE}
 
     private enum Direction {LEFT, RIGHT}
 }

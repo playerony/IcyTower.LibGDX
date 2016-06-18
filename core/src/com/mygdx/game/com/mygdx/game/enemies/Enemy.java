@@ -11,21 +11,20 @@ import com.mygdx.game.com.mygdx.game.entities.AnimatedImage;
  */
 public abstract class Enemy extends Image {
     protected static final int WIDTH = 48;
-
     protected static final int HEIGHT = 48;
-    public float SPEED = 10;
-
+    protected static Texture enemyTexture;
     public AnimatedImage enem;
+    protected float SPEED = 10;
     protected boolean move = true;
-
-    protected Rectangle bounds;
     protected Rectangle top;
     protected Rectangle bottom;
     protected Rectangle left;
     protected Rectangle right;
 
-    public Enemy(float x, float y, final Texture texture) {
+    protected Enemy(float x, float y, final Texture texture) {
         super(texture);
+
+        enemyTexture = texture;
 
         this.setSize(WIDTH, HEIGHT);
         this.setPosition(x, y);
@@ -33,10 +32,9 @@ public abstract class Enemy extends Image {
         initAnimations();
 
         enem = new AnimatedImage(getAnimation());
-        bounds = new Rectangle((int)getX(), (int)getY(), (int)getWidth(), (int)getHeight());
+
         top = new Rectangle((int) getX(), (int) getY(), (int) getWidth(), 5);
         bottom = new Rectangle((int) getX() + 1, (int) getY() - (int) getHeight() - 1, (int) getWidth() - 2, 5);
-
         left = new Rectangle((int)getX(), (int)getY() - 5, 5, (int)getHeight() - 10);
         right = new Rectangle((int)getX() + (int)getWidth() - 5, (int)getY() - 5, 5, (int)getHeight() - 10);
     }
@@ -45,6 +43,8 @@ public abstract class Enemy extends Image {
 
     abstract void initAnimations();
 
+    public abstract void die();
+
     public abstract Animation getAnimation();
 
     public abstract void update();
@@ -52,10 +52,6 @@ public abstract class Enemy extends Image {
     public abstract void oppositeSPEED();
 
     //////////// GETTERS
-
-    public Rectangle getBounds() {
-        return bounds;
-    }
 
     public Rectangle getTopBound() { return top; }
 
@@ -75,10 +71,18 @@ public abstract class Enemy extends Image {
         return move;
     }
 
-    //////////// SETTERS
-
     public void setMove(boolean move){
         this.move = move;
+    }
+
+    //////////// SETTERS
+
+    public float getSPEED() {
+        return this.SPEED;
+    }
+
+    public void setSPEED(float speed) {
+        this.SPEED = speed;
     }
 
 }

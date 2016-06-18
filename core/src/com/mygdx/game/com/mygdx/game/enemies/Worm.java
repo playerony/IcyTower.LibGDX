@@ -10,12 +10,11 @@ import com.badlogic.gdx.utils.Array;
  * Created by pawel_000 on 2016-06-09.
  */
 public class Worm extends Enemy {
-    private static final Texture enemyTexture = new Texture("assets/mob_1_red.png");
     private Animation enemyRun;
     private Animation enemyDie;
 
-    public Worm(float x, float y) {
-        super(x, y, enemyTexture);
+    public Worm(float x, float y, final Texture texture) {
+        super(x, y, texture);
 
         this.setPosition(x, y);
 
@@ -24,8 +23,6 @@ public class Worm extends Enemy {
 
     void init() {
         this.setSize(WIDTH, HEIGHT);
-
-        initAnimations();
     }
 
     void initAnimations() {
@@ -44,6 +41,11 @@ public class Worm extends Enemy {
 
         enemyDie = new Animation(0.1f, frames);
         frames.clear();
+    }
+
+    @Override
+    public void die() {
+        this.setMove(false);
     }
 
     public Animation getAnimation() {
@@ -78,7 +80,6 @@ public class Worm extends Enemy {
     public void update() {
         if (move) {
             this.moveBy(SPEED * Gdx.graphics.getDeltaTime(), 0);
-            bounds.setPosition(getX(), getY());
 
             top.setPosition((int) getX(), (int) getY());
             bottom.setPosition((int) getX() + 1, (int) getY() - (int) getHeight() + 1);

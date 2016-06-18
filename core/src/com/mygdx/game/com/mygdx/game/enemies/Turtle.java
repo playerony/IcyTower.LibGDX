@@ -10,14 +10,16 @@ import com.badlogic.gdx.utils.Array;
  * Created by pawel_000 on 2016-06-09.
  */
 public class Turtle extends Enemy {
-    private static final Texture enemyTexture = new Texture("assets/mob_2_green.png");
-    private static boolean direction = true;
+
+    private static final float GRAVITY = -(9.81f * 2.5f);
+    private boolean direction = true;
     private boolean hide = false;
     private Animation enemyRunLeft;
     private Animation enemyRunRight;
     private Animation enemyDie;
-    public Turtle(float x, float y) {
-        super(x, y, enemyTexture);
+
+    public Turtle(float x, float y, final Texture texture) {
+        super(x, y, texture);
 
         this.setPosition(x, y);
 
@@ -26,8 +28,6 @@ public class Turtle extends Enemy {
 
     void init() {
         this.setSize(WIDTH, HEIGHT);
-
-        initAnimations();
     }
 
     void initAnimations() {
@@ -57,6 +57,11 @@ public class Turtle extends Enemy {
         frames.clear();
     }
 
+    @Override
+    public void die() {
+        this.setMove(false);
+    }
+
     public Animation getAnimation() {
         Animation result = null;
 
@@ -80,8 +85,10 @@ public class Turtle extends Enemy {
     }
 
     private State getState() {
-        if (move)
+        if (move && !hide)
             return State.MOVE;
+        else if (move && hide)
+            return State.DIE;
         else
             return State.DIE;
     }
@@ -97,7 +104,6 @@ public class Turtle extends Enemy {
     public void update() {
         if (move) {
             this.moveBy(SPEED * Gdx.graphics.getDeltaTime(), 0);
-            bounds.setPosition(getX(), getY());
 
             top.setPosition((int) getX(), (int) getY());
             bottom.setPosition((int) getX() + 1, (int) getY() - (int) getHeight() + 1);
