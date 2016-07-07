@@ -6,32 +6,30 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Array;
 
 /**
  * Created by pawel_000 on 2016-05-24.
  */
-public class Player extends Image {
+public class Player extends Entity {
 
     private static final int WIDTH = 64;
     private static final int HEIGHT = 64;
-    private static final int START_X = 25;
-    private static final int START_Y = 0;
-    private static final float GRAVITY = -(9.81f * 2.5f);
-    public State currentState;
-    public Direction direction;
+    private static final int JUMP_VELOCITY = 800;
+    private static final float START_X = 25.0f;
+    private static final float START_Y = 36.5f;
     public float angle = 0.0f;
     private float jumpVelocity;
     private float runVelocity;
+    private State currentState;
+    private Direction direction;
+
     private boolean collision = false;
     private boolean rotate = false;
     private boolean jump = true;
     private boolean floor = false;
     private boolean die = false;
     private boolean flip = false;
-
-    private Texture playerTexture;
 
     private Animation playerRunRight;
     private Animation playerJumpRight;
@@ -44,29 +42,27 @@ public class Player extends Image {
     private Animation playerFlipLeft;
     private Animation playerDie;
 
+    private Rectangle box;
     private Rectangle bottom;
     private Rectangle top;
     private Rectangle left;
     private Rectangle right;
 
     public Player(Texture texture) {
-        super(texture);
+        super(texture, START_X, START_Y, WIDTH, HEIGHT);
 
-        this.setSize(WIDTH, HEIGHT);
         this.setOrigin(WIDTH / 2, HEIGHT / 2);
-        this.setPosition(START_X, START_Y);
-
-        playerTexture = texture;
 
         init();
     }
 
-    private void init() {
+    protected void init() {
         currentState = State.STANDING;
 
         initRightAnimations();
         initLeftAnimations();
 
+        box = new Rectangle((int) getX(), (int) getY(), (int) getWidth(), (int) getHeight());
         top = new Rectangle((int)getX() + 5, (int)getY(), (int)getWidth() - 10, 5);
         bottom = new Rectangle((int) getX() + 1, (int) getY() - (int) getHeight() + 10, (int) getWidth() - 2, 10);
         left = new Rectangle((int)getX(), (int)getY() - 5, 5, (int)getHeight() - 10);
@@ -81,7 +77,7 @@ public class Player extends Image {
         ///////////////////////////
 
         for(int i=1 ; i<4 ; i++) {
-            TextureRegion region = new TextureRegion(playerTexture, i * 64, 0, 64, 64);
+            TextureRegion region = new TextureRegion(texture, i * WIDTH, 0, WIDTH, HEIGHT);
             region.flip(true, false);
             frames.add(region);
         }
@@ -92,7 +88,7 @@ public class Player extends Image {
         ///////////////////////////
 
         for(int i=5 ; i<6 ; i++) {
-            TextureRegion region = new TextureRegion(playerTexture, i * 64, 0, 64, 64);
+            TextureRegion region = new TextureRegion(texture, i * WIDTH, 0, WIDTH, HEIGHT);
             region.flip(true, false);
             frames.add(region);
         }
@@ -102,15 +98,16 @@ public class Player extends Image {
 
         ///////////////////////////
 
-        TextureRegion region = new TextureRegion(playerTexture, 0, 0, 64, 64);
+        TextureRegion region = new TextureRegion(texture, 0, 0, WIDTH, HEIGHT);
         region.flip(true, false);
         frames.add(region);
 
         playerStandingLeft = new Animation(0.1f, frames);
         frames.clear();
 
+        ///////////////////////////
 
-        region = new TextureRegion(playerTexture, 7 * 64, 0, 64, 64);
+        region = new TextureRegion(texture, 7 * WIDTH, 0, WIDTH, HEIGHT);
         region.flip(true, false);
         frames.add(region);
 
@@ -124,7 +121,7 @@ public class Player extends Image {
         ///////////////////////////
 
         for(int i=1 ; i<4 ; i++)
-            frames.add(new TextureRegion(playerTexture, i * 64, 0, 64, 64));
+            frames.add(new TextureRegion(texture, i * WIDTH, 0, WIDTH, HEIGHT));
 
         playerRunRight = new Animation(0.1f, frames);
         frames.clear();
@@ -132,27 +129,28 @@ public class Player extends Image {
         ///////////////////////////
 
         for(int i=5 ; i<6 ; i++)
-            frames.add(new TextureRegion(playerTexture, i * 64, 0, 64, 64));
+            frames.add(new TextureRegion(texture, i * WIDTH, 0, WIDTH, HEIGHT));
 
         playerJumpRight = new Animation(0.1f, frames);
         frames.clear();
 
         ///////////////////////////
 
-        frames.add(new TextureRegion(playerTexture, 0, 0, 64, 64));
+        frames.add(new TextureRegion(texture, 0, 0, WIDTH, HEIGHT));
 
         playerStandingRight = new Animation(0.1f, frames);
         frames.clear();
 
         ///////////////////////////
 
-        frames.add(new TextureRegion(playerTexture, 6 * 64, 0, 64, 64));
+        frames.add(new TextureRegion(texture, 6 * WIDTH, 0, WIDTH, HEIGHT));
 
         playerDie = new Animation(0.1f, frames);
         frames.clear();
 
+        ///////////////////////////
 
-        frames.add(new TextureRegion(playerTexture, 7 * 64, 0, 64, 64));
+        frames.add(new TextureRegion(texture, 7 * WIDTH, 0, WIDTH, HEIGHT));
 
         playerFlipRight = new Animation(0.1f, frames);
         frames.clear();
@@ -164,16 +162,17 @@ public class Player extends Image {
         if(!collision)
             move();
 
-        if( this.getY() > 36.5) {
+        if (this.getY() > START_Y) {
             jumpVelocity += GRAVITY;
             collision = false;
         } else {
-            this.setY((float) 36.5);
+            this.setY(START_Y);
             jumpVelocity = 0;
             jump = true;
             floor = true;
         }
 
+        box.setPosition((int) getX(), (int) getY());
         bottom.setPosition((int) getX() + 1, (int) getY() - (int) getHeight() + 5);
         top.setPosition((int)getX() + 5, (int)getY());
         left.setPosition((int)getX(), (int)getY() - 5);
@@ -238,7 +237,6 @@ public class Player extends Image {
     }
 
     public void move(){
-
         this.moveBy(0, jumpVelocity * Gdx.graphics.getDeltaTime());
     }
 
@@ -252,13 +250,11 @@ public class Player extends Image {
         else if (jumpVelocity < 0 && !die && !flip)
             return State.FALLING;
 
-        else if (flip) {
+        else if (flip)
             return State.FLIP;
-        }
 
-        else if (die) {
+        else if (die)
             return State.DIE;
-        }
 
         else
             return State.STANDING;
@@ -290,7 +286,7 @@ public class Player extends Image {
 
     private void jump() {
         if(jump && jumpVelocity >= -100){
-            jumpVelocity += 800;
+            jumpVelocity += JUMP_VELOCITY;
             jump = false;
         }
     }
@@ -325,11 +321,11 @@ public class Player extends Image {
         return this.rotate;
     }
 
-    //////////// SETTERS
-
     public void setRotate(boolean rotate) {
         this.rotate = rotate;
     }
+
+    //////////// SETTERS
 
     public boolean getDie() {
         return die;
@@ -339,16 +335,20 @@ public class Player extends Image {
         this.die = die;
     }
 
+    public Rectangle getRectangleBox() {
+        return box;
+    }
+
     public void setJump(boolean jump) {
         this.jump = jump;
     }
 
-    public void setCollision(boolean value) {
-        collision = value;
-    }
-
     public void setFlip(boolean flip) {
         this.flip = flip;
+    }
+
+    public void setCollision(boolean value) {
+        collision = value;
     }
 
     private enum State {FALLING, JUMPING, FLIP, STANDING, RUNNING, DIE}

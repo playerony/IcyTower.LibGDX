@@ -5,36 +5,33 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.com.mygdx.game.controllers.Enemy;
 
 /**
  * Created by pawel_000 on 2016-06-09.
  */
 public class Turtle extends Enemy {
-
+    private static final int WIDTH = 48;
+    private static final int HEIGHT = 48;
     private static final float GRAVITY = -(9.81f * 2.5f);
-    private boolean direction = true;
+
     private boolean hide = false;
+
     private Animation enemyRunLeft;
     private Animation enemyRunRight;
     private Animation enemyDie;
 
     public Turtle(float x, float y, final Texture texture) {
-        super(x, y, texture);
-
-        this.setPosition(x, y);
-
-        init();
+        super(texture, x, y, WIDTH, HEIGHT);
     }
 
-    void init() {
-        this.setSize(WIDTH, HEIGHT);
-    }
+    protected void initAnimations() {
+        System.out.printf("Turtle animation\n");
 
-    void initAnimations() {
         Array<TextureRegion> frames = new Array<TextureRegion>();
 
         for (int i = 0; i < 2; i++) {
-            TextureRegion region = new TextureRegion(enemyTexture, i * WIDTH, 0, WIDTH, HEIGHT);
+            TextureRegion region = new TextureRegion(texture, i * WIDTH, 0, WIDTH, HEIGHT);
             frames.add(region);
         }
 
@@ -42,7 +39,7 @@ public class Turtle extends Enemy {
         frames.clear();
 
         for (int i = 0; i < 2; i++) {
-            TextureRegion region = new TextureRegion(enemyTexture, i * WIDTH, 0, WIDTH, HEIGHT);
+            TextureRegion region = new TextureRegion(texture, i * WIDTH, 0, WIDTH, HEIGHT);
             region.flip(true, false);
             frames.add(region);
         }
@@ -50,7 +47,7 @@ public class Turtle extends Enemy {
         enemyRunRight = new Animation(0.1f, frames);
         frames.clear();
 
-        TextureRegion region = new TextureRegion(enemyTexture, 2 * WIDTH, 0, WIDTH, HEIGHT);
+        TextureRegion region = new TextureRegion(texture, 2 * WIDTH, 0, WIDTH, HEIGHT);
         frames.add(region);
 
         enemyDie = new Animation(0.1f, frames);
@@ -98,7 +95,7 @@ public class Turtle extends Enemy {
 
         direction = !direction;
 
-        enem.setAnimation(getAnimation());
+        animation.setAnimation(getAnimation());
     }
 
     public void update() {
@@ -110,10 +107,8 @@ public class Turtle extends Enemy {
             left.setPosition((int) getX(), (int) getY() - 5);
             right.setPosition((int) getX() + (int) getWidth() - 5, (int) getY() - 5);
 
-            enem.setPosition(this.getX(), this.getY());
+            animation.setPosition(this.getX(), this.getY());
         } else
-            enem.setAnimation(enemyDie);
+            animation.setAnimation(enemyDie);
     }
-
-    public enum State {MOVE, DIE}
 }

@@ -5,10 +5,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.mygdx.game.IcyTower;
 import com.mygdx.game.com.mygdx.game.AssetsManager.Asset;
-import com.mygdx.game.com.mygdx.game.enemies.Enemy;
+import com.mygdx.game.com.mygdx.game.controllers.Enemy;
+import com.mygdx.game.com.mygdx.game.controllers.FlyingObjectControler;
 import com.mygdx.game.com.mygdx.game.enemies.Turtle;
 import com.mygdx.game.com.mygdx.game.enemies.Worm;
 import com.mygdx.game.com.mygdx.game.entities.*;
@@ -25,24 +27,30 @@ public class GameScreen extends AbstractScreen {
     private static final String START_BUTTON_TEXT = "I PLAYER GAME";
     private static final int HEIGHT_BETWEEN_PLATFORMS = 200;
     private static final int PLATFORMS = 12;
+    private static float enemyTimer = 0;
+    private static float dieTimer = 0;
+
     private static int AMOUT_OF_ENEMIES = 0;
     private static int LEVEL_CLOUDS = 1;
     private static int LEVEL_PLATFORMS = 1;
     private static int SCORE = 0;
     private static int add = 0;
-    private static int value = 0;
-    private static float dieTimer = 0;
-    private static float enemyTimer = 0;
-    TextButton startGameButton;
-    private Texture logoTexture;
     private int CLOUDS = 10;
-    private BitmapFont font;
+
     private boolean addPoints = true;
     private boolean first = true;
-    private Player player;
+
+    private TextButton startGameButton;
+    private Texture logoTexture;
+    private BitmapFont font;
     private AnimatedImage anim;
-    private Floor floor;
     private Background background;
+    private Label scoreLabel;
+
+    private Floor floor;
+    private Player player;
+    private FlyingObjectControler flyingObjectControler;
+
     private ArrayList<Platform> platformArray;
     private ArrayList<Cloud> cloudArray;
     private ArrayList<Enemy> enemyArray;
@@ -74,6 +82,21 @@ public class GameScreen extends AbstractScreen {
 
         initPlayer();
         initMenuScreen();
+        initScoreLabel();
+
+        initFlyingObjectControler();
+    }
+
+    private void initFlyingObjectControler() {
+        flyingObjectControler = new FlyingObjectControler(assets, stage);
+    }
+
+    private void initScoreLabel() {
+        Label.LabelStyle style = new Label.LabelStyle();
+        style.font = new BitmapFont(Gdx.files.internal("assets/font.fnt"), Gdx.files.internal("assets/font.png"), false);
+
+        scoreLabel = new Label("MARIO\n" + menuScreen.getPoints(SCORE), style);
+        scoreLabel.setPosition(-90, IcyTower.SCREEN_HEIGHT - font.getXHeight() - 140);
     }
 
     private void initMenuScreen() {
@@ -118,7 +141,7 @@ public class GameScreen extends AbstractScreen {
     }
 
     private void initBackground() {
-        background = new Background(30, 250);
+        background = new Background(30, 200);
         stage.addActor(background);
     }
 
@@ -164,20 +187,8 @@ public class GameScreen extends AbstractScreen {
         batch.setProjectionMatrix(cameraScore.combined);
 
         if (!menuScreen.getMenuState()) {
-            if (SCORE == 0)
-                font.draw(batch, "MARIO\n" + "000000", -90, IcyTower.SCREEN_HEIGHT - font.getXHeight() - 100);
-            else if (SCORE < 9 && SCORE > 0)
-                font.draw(batch, "MARIO\n" + "00000" + Integer.toString(SCORE), -90, IcyTower.SCREEN_HEIGHT - font.getXHeight() - 100);
-            else if (SCORE < 99 && SCORE >= 10)
-                font.draw(batch, "MARIO\n" + "0000" + Integer.toString(SCORE), -90, IcyTower.SCREEN_HEIGHT - font.getXHeight() - 100);
-            else if (SCORE < 999 && SCORE >= 100)
-                font.draw(batch, "MARIO\n" + "000" + Integer.toString(SCORE), -90, IcyTower.SCREEN_HEIGHT - font.getXHeight() - 100);
-            else if (SCORE < 9999 && SCORE >= 1000)
-                font.draw(batch, "MARIO\n" + "00" + Integer.toString(SCORE), -90, IcyTower.SCREEN_HEIGHT - font.getXHeight() - 100);
-            else if (SCORE < 99999 && SCORE >= 10000)
-                font.draw(batch, "MARIO\n" + "0" + Integer.toString(SCORE), -90, IcyTower.SCREEN_HEIGHT - font.getXHeight() - 100);
-            else
-                font.draw(batch, "MARIO\n" + Integer.toString(SCORE), -90, IcyTower.SCREEN_HEIGHT - font.getXHeight() - 100);
+            scoreLabel.setText("MARIO\n" + menuScreen.getPoints(SCORE));
+            scoreLabel.draw(batch, 1);
         }
 
         batch.end();
@@ -186,8 +197,16 @@ public class GameScreen extends AbstractScreen {
     private void update() {
         stage.act();
 
-        player.update();
+        flyingObjectControler.update(player);
 
+        backgroundUpdate();
+        playerUpdate();
+        platformUpdate();
+        cloudsUpdate();
+        addScore();
+    }
+
+    private void backgroundUpdate() {
         background.update(player.getX() / 300, player.getWidth() / 2 + player.getY() / 30);
 
         if(player.getX() > IcyTower.SCREEN_WIDTH)
@@ -199,136 +218,43 @@ public class GameScreen extends AbstractScreen {
         anim.setPosition(player.getX(), player.getY());
         anim.setAnimation(player.getAnimation());
 
+        if (!player.getDie())
+            camera.position.set(IcyTower.SCREEN_WIDTH / 2, player.getY() + 200 + player.getJumpVelocity() / 100, 0);
+
+
+        if (player.getX() > IcyTower.SCREEN_WIDTH)
+            player.setX(-player.getWidth());
+
+        if (player.getX() < -player.getWidth())
+            player.setX(IcyTower.SCREEN_WIDTH);
+    }
+
+    private void playerUpdate() {
+        player.update();
+        playerDie();
+        playerRotation();
+
         if (player.getJumpVelocity() < -1500) {
             player.setDie(true);
             player.setJump(false);
             player.setJumpVelocity(300);
         }
+    }
 
-        if (!player.getDie())
-            camera.position.set(IcyTower.SCREEN_WIDTH / 2, player.getY() + 200 + player.getJumpVelocity() / 100, 0);
-
-        for(Platform p : platformArray) {
-            if (isPlayerOnPlatform(p) && !player.getDie()) {
-                player.setJump(true);
-                player.setJumpVelocity(0);
-                player.setY(p.getY() + p.getHeight() - 4);
-                player.setCollision(true);
-
-                if (addPoints && p.isPoints()) {
-                    add += (2 * LEVEL_PLATFORMS);
-                    addPoints = false;
-
-                    p.setPoints(false);
-                }
+    private void playerRotation() {
+        if (player.getRotate()) {
+            if (player.angle > 360) {
+                player.angle = 0;
+                player.setRotate(false);
+                player.setFlip(false);
             }
 
-            if(player.getY() - IcyTower.SCREEN_HEIGHT * 2 > p.getY()){
-                int length = MathUtils.random(3) + 3;
-
-                p.setSIZE(length);
-                p.setPoints(true);
-                p.setPos(stage, MathUtils.random(IcyTower.SCREEN_WIDTH - (length * 64)), LEVEL_PLATFORMS * HEIGHT_BETWEEN_PLATFORMS);
-
-                LEVEL_PLATFORMS++;
-
-                if (LEVEL_PLATFORMS % 10 == 0 && AMOUT_OF_ENEMIES <= 8)
-                    AMOUT_OF_ENEMIES++;
-
-                int value = MathUtils.random(6);
-
-                if(value < 3){
-                    Enemy e = null;
-                    int type = MathUtils.random(AMOUT_OF_ENEMIES);
-
-                    switch (type) {
-                        case 0:
-                            e = new Worm(p.getX() + 15, p.getY() + p.getHeight() - 4, assets.manager.get("assets/mob_1_red.png", Texture.class));
-                            break;
-
-                        case 2:
-                            e = new Turtle(p.getX() + 15, p.getY() + p.getHeight() - 4, assets.manager.get("assets/mob_2_green.png", Texture.class));
-                            break;
-
-                        case 4:
-                            e = new Worm(p.getX() + 15, p.getY() + p.getHeight() - 4, assets.manager.get("assets/mob_1_blue.png", Texture.class));
-                            break;
-
-                        case 6:
-                            e = new Turtle(p.getX() + 15, p.getY() + p.getHeight() - 4, assets.manager.get("assets/mob_3_black.png", Texture.class));
-                            break;
-
-                        case 8:
-                            e = new Turtle(p.getX() + 15, p.getY() + p.getHeight() - 4, assets.manager.get("assets/mob_2_red.png", Texture.class));
-                            break;
-
-                        case 10:
-                            e = new Turtle(p.getX() + 15, p.getY() + p.getHeight() - 4, assets.manager.get("assets/mob_3_blue.png", Texture.class));
-                            break;
-
-                        case 12:
-                            e = new Worm(p.getX() + 15, p.getY() + p.getHeight() - 4, assets.manager.get("assets/mob_1_grey.png", Texture.class));
-                            break;
-
-                        case 14:
-                            e = new Turtle(p.getX() + 15, p.getY() + p.getHeight() - 4, assets.manager.get("assets/mob_2_blue.png", Texture.class));
-                            break;
-
-                        case 16:
-                            e = new Turtle(p.getX() + 15, p.getY() + p.getHeight() - 4, assets.manager.get("assets/mob_3_grey.png", Texture.class));
-                            break;
-
-                        default:
-
-                            break;
-                    }
-
-                    if (e != null) {
-                        e.enem.setAnimation(e.getAnimation());
-                        e.enem.setPosition(e.getX(), e.getY());
-                        e.setSPEED(e.getSPEED() + (LEVEL_PLATFORMS / 10));
-
-                        stage.addActor(e.enem);
-                        enemyArray.add(e);
-                    }
-                }
-            }
-
-            enemyUpdate(p);
+            anim.setRotation(player.angle);
+            player.angle += 10.25f;
         }
+    }
 
-        cloudsUpdate();
-
-        if(player.getJumpVelocity() > 0)
-            addPoints = true;
-
-        if(add > 0){
-            if(add < 100) {
-                SCORE += 1;
-                add -= 1;
-            } else if(add >= 100){
-                SCORE += 10;
-                add -= 10;
-            }
-
-        } else
-            value = 0;
-
-        if(removeEnemyArray.size() > 0){
-            enemyTimer += Gdx.graphics.getDeltaTime();
-
-            if (enemyTimer > 1.0f) {
-                for (Enemy e : removeEnemyArray) {
-                    e.enem.addAction(Actions.removeActor());
-
-                    enemyArray.remove(e);
-                }
-
-                removeEnemyArray.clear();
-                enemyTimer = 0;
-            }
-        }
-
+    private void playerDie() {
         if (player.getDie()) {
             dieTimer += Gdx.graphics.getDeltaTime();
 
@@ -362,7 +288,7 @@ public class GameScreen extends AbstractScreen {
                 }
 
                 for (Enemy e : enemyArray) {
-                    e.enem.addAction(Actions.removeActor());
+                    e.animation.addAction(Actions.removeActor());
                     e.addAction(Actions.removeActor());
                 }
 
@@ -382,16 +308,115 @@ public class GameScreen extends AbstractScreen {
                 menuScreen.showMenu(stage);
             }
         }
+    }
 
-        if (player.getRotate()) {
-            if (player.angle > 360) {
-                player.angle = 0;
-                player.setRotate(false);
-                player.setFlip(false);
+    private void addScore() {
+        if (player.getJumpVelocity() > 0)
+            addPoints = true;
+
+        if (add > 0) {
+            if (add < 100) {
+                SCORE += 1;
+                add -= 1;
+            } else if (add >= 100) {
+                SCORE += 10;
+                add -= 10;
+            }
+        }
+    }
+
+    private void platformUpdate() {
+        for (Platform p : platformArray) {
+            if (isPlayerOnPlatform(p) && !player.getDie()) {
+                player.setJump(true);
+                player.setJumpVelocity(0);
+                player.setY(p.getY() + p.getHeight() - 4);
+                player.setCollision(true);
+
+                if (addPoints && p.isPoints()) {
+                    add += (2 * LEVEL_PLATFORMS);
+                    addPoints = false;
+
+                    p.setPoints(false);
+                }
             }
 
-            anim.setRotation(player.angle);
-            player.angle += 10.25f;
+            if (player.getY() - IcyTower.SCREEN_HEIGHT * 2 > p.getY()) {
+                int length = MathUtils.random(3) + 3;
+
+                p.setSIZE(length);
+                p.setPoints(true);
+                p.setPos(stage, MathUtils.random(IcyTower.SCREEN_WIDTH - (length * 64)), LEVEL_PLATFORMS * HEIGHT_BETWEEN_PLATFORMS);
+
+                LEVEL_PLATFORMS++;
+
+                if (LEVEL_PLATFORMS % 10 == 0 && AMOUT_OF_ENEMIES <= 8)
+                    AMOUT_OF_ENEMIES++;
+
+                getRandomEnemy(p);
+            }
+
+            enemyUpdate(p);
+        }
+    }
+
+    private void getRandomEnemy(Platform p) {
+        int value = MathUtils.random(6);
+
+        if (value < 3) {
+            Enemy e = null;
+            int type = MathUtils.random(AMOUT_OF_ENEMIES);
+
+            switch (type) {
+                case 0:
+                    e = new Worm(p.getX() + 15, p.getY() + p.getHeight() - 4, assets.manager.get("assets/mob_1_red.png", Texture.class));
+                    break;
+
+                case 2:
+                    e = new Turtle(p.getX() + 15, p.getY() + p.getHeight() - 4, assets.manager.get("assets/mob_2_green.png", Texture.class));
+                    break;
+
+                case 4:
+                    e = new Worm(p.getX() + 15, p.getY() + p.getHeight() - 4, assets.manager.get("assets/mob_1_blue.png", Texture.class));
+                    break;
+
+                case 6:
+                    e = new Turtle(p.getX() + 15, p.getY() + p.getHeight() - 4, assets.manager.get("assets/mob_3_black.png", Texture.class));
+                    break;
+
+                case 8:
+                    e = new Turtle(p.getX() + 15, p.getY() + p.getHeight() - 4, assets.manager.get("assets/mob_2_red.png", Texture.class));
+                    break;
+
+                case 10:
+                    e = new Turtle(p.getX() + 15, p.getY() + p.getHeight() - 4, assets.manager.get("assets/mob_3_blue.png", Texture.class));
+                    break;
+
+                case 12:
+                    e = new Worm(p.getX() + 15, p.getY() + p.getHeight() - 4, assets.manager.get("assets/mob_1_grey.png", Texture.class));
+                    break;
+
+                case 14:
+                    e = new Turtle(p.getX() + 15, p.getY() + p.getHeight() - 4, assets.manager.get("assets/mob_2_blue.png", Texture.class));
+                    break;
+
+                case 16:
+                    e = new Turtle(p.getX() + 15, p.getY() + p.getHeight() - 4, assets.manager.get("assets/mob_3_grey.png", Texture.class));
+                    break;
+
+                default:
+
+                    break;
+            }
+
+            if (e != null) {
+                e.animation.setAnimation(e.getAnimation());
+                e.animation.setPosition(e.getX(), e.getY());
+                e.setSPEED(e.getSPEED() + (LEVEL_PLATFORMS / 10));
+
+                stage.addActor(e.animation);
+                enemyArray.add(e);
+            }
         }
     }
 
@@ -429,12 +454,29 @@ public class GameScreen extends AbstractScreen {
 
             e.update();
         }
+
+        enemyDie();
+    }
+
+    private void enemyDie() {
+        if (removeEnemyArray.size() > 0) {
+            enemyTimer += Gdx.graphics.getDeltaTime();
+
+            if (enemyTimer > 1.0f) {
+                for (Enemy e : removeEnemyArray) {
+                    e.animation.addAction(Actions.removeActor());
+
+                    enemyArray.remove(e);
+                }
+
+                removeEnemyArray.clear();
+                enemyTimer = 0;
+            }
+        }
     }
 
     private void saveNewRecord() throws FileNotFoundException {
         if (SCORE > menuScreen.getBestScore()) {
-            System.out.printf("%d %d \n", SCORE, menuScreen.getBestScore());
-
             PrintWriter zapis = new PrintWriter("assets/bestScore.txt");
 
             zapis.println(SCORE);

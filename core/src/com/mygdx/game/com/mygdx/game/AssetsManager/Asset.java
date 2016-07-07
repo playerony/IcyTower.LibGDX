@@ -31,6 +31,19 @@ public class Asset implements Disposable {
         manager.load("assets/mob_3_black.png", Texture.class);
         manager.load("assets/mob_3_blue.png", Texture.class);
         manager.load("assets/mob_3_grey.png", Texture.class);
+
+        manager.load("assets/bomb_black.png", Texture.class);
+        manager.load("assets/bomb_blue.png", Texture.class);
+        manager.load("assets/bomb_grey.png", Texture.class);
+
+        manager.load("assets/bird_red.png", Texture.class);
+        manager.load("assets/bird_blue.png", Texture.class);
+        manager.load("assets/bird_green.png", Texture.class);
+
+        manager.load("assets/medusa_pink.png", Texture.class);
+        manager.load("assets/medusa_blue.png", Texture.class);
+        manager.load("assets/medusa_white.png", Texture.class);
+
     }
 
     public void dispose() {
