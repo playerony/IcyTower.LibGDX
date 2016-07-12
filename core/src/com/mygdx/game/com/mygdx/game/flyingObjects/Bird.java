@@ -1,4 +1,4 @@
-package com.mygdx.game.com.mygdx.game.enemies;
+package com.mygdx.game.com.mygdx.game.flyingObjects;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;

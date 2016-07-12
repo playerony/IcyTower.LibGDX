@@ -4,13 +4,18 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.mygdx.game.IcyTower;
 import com.mygdx.game.com.mygdx.game.AssetsManager.Asset;
 import com.mygdx.game.com.mygdx.game.controllers.Enemy;
 import com.mygdx.game.com.mygdx.game.controllers.FlyingObjectControler;
+import com.mygdx.game.com.mygdx.game.controllers.ScoreControler;
 import com.mygdx.game.com.mygdx.game.enemies.Turtle;
 import com.mygdx.game.com.mygdx.game.enemies.Worm;
 import com.mygdx.game.com.mygdx.game.entities.*;
@@ -24,31 +29,35 @@ import java.util.ArrayList;
  */
 public class GameScreen extends AbstractScreen {
 
-    private static final String START_BUTTON_TEXT = "I PLAYER GAME";
+    private static final String PAUSE_INFORMATION_BUTTON_TEXT = "PAUSE";
+    private static final String PAUSE_BUTTON_TEXT = "P";
     private static final int HEIGHT_BETWEEN_PLATFORMS = 200;
+    private static final float CAMERA_MOVEMENT_SPEED = 10;
     private static final int PLATFORMS = 12;
     private static float enemyTimer = 0;
-    private static float dieTimer = 0;
-
+    private static int POINTS_FOR_ENEMY = 0;
     private static int AMOUT_OF_ENEMIES = 0;
     private static int LEVEL_CLOUDS = 1;
     private static int LEVEL_PLATFORMS = 1;
-    private static int SCORE = 0;
-    private static int add = 0;
-    private int CLOUDS = 10;
+    private float cameraVelocity = 0.0f;
+    private int CLOUDS = 1;
 
-    private boolean addPoints = true;
     private boolean first = true;
+    private boolean die = false;
 
-    private TextButton startGameButton;
-    private Texture logoTexture;
     private BitmapFont font;
     private AnimatedImage anim;
     private Background background;
+    private Texture logoTexture;
+
     private Label scoreLabel;
+    private Label pauseLabel;
+    private TextButton pauseButton;
 
     private Floor floor;
     private Player player;
+    private MenuScreen menuScreen;
+    private ScoreControler scoreControler;
     private FlyingObjectControler flyingObjectControler;
 
     private ArrayList<Platform> platformArray;
@@ -56,7 +65,7 @@ public class GameScreen extends AbstractScreen {
     private ArrayList<Enemy> enemyArray;
     private ArrayList<Enemy> removeEnemyArray;
 
-    private MenuScreen menuScreen;
+    private Stage constantStage;
 
     public GameScreen(IcyTower game){
         super(game);
@@ -72,6 +81,8 @@ public class GameScreen extends AbstractScreen {
     }
 
     public void init() {
+        constantStage = new Stage(new StretchViewport(IcyTower.SCREEN_WIDTH, IcyTower.SCREEN_HEIGHT, cameraScore));
+
         initClouds();
         initPlatforms();
         initEnemy();
@@ -82,12 +93,41 @@ public class GameScreen extends AbstractScreen {
 
         initPlayer();
         initMenuScreen();
+        initPauseLabel();
+
+        initScoreControler();
         initScoreLabel();
+
+        initPauseButton();
 
         initFlyingObjectControler();
     }
 
+    private void initPauseButton() {
+        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
+        style.font = new BitmapFont(Gdx.files.internal("assets/font.fnt"), Gdx.files.internal("assets/font.png"), false);
+
+        pauseButton = new TextButton(PAUSE_BUTTON_TEXT, style);
+        pauseButton.setPosition(cameraScore.position.x + IcyTower.SCREEN_WIDTH / 3,
+                cameraScore.position.y + IcyTower.SCREEN_HEIGHT / 3 + 40);
+
+        pauseButton.addListener(new ClickListener() {
+
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                game.setPause(!game.isPause());
+
+                return super.touchDown(event, x, y, pointer, button);
+            }
+        });
+    }
+
+    private void initScoreControler() {
+
+        scoreControler = new ScoreControler();
+    }
+
     private void initFlyingObjectControler() {
+
         flyingObjectControler = new FlyingObjectControler(assets, stage);
     }
 
@@ -95,8 +135,16 @@ public class GameScreen extends AbstractScreen {
         Label.LabelStyle style = new Label.LabelStyle();
         style.font = new BitmapFont(Gdx.files.internal("assets/font.fnt"), Gdx.files.internal("assets/font.png"), false);
 
-        scoreLabel = new Label("MARIO\n" + menuScreen.getPoints(SCORE), style);
+        scoreLabel = new Label("MARIO\n" + menuScreen.getPoints(scoreControler.getSCORE()), style);
         scoreLabel.setPosition(-90, IcyTower.SCREEN_HEIGHT - font.getXHeight() - 140);
+    }
+
+    private void initPauseLabel() {
+        Label.LabelStyle style = new Label.LabelStyle();
+        style.font = new BitmapFont(Gdx.files.internal("assets/font.fnt"), Gdx.files.internal("assets/font.png"), false);
+
+        pauseLabel = new Label(PAUSE_INFORMATION_BUTTON_TEXT, style);
+        pauseLabel.setPosition(camera.position.x, camera.position.y);
     }
 
     private void initMenuScreen() {
@@ -126,7 +174,9 @@ public class GameScreen extends AbstractScreen {
             int length = MathUtils.random(3) + 3;
 
             Platform p = new Platform(MathUtils.random(IcyTower.SCREEN_WIDTH - length * 64),
-                    LEVEL_PLATFORMS * HEIGHT_BETWEEN_PLATFORMS, length);
+                    LEVEL_PLATFORMS * HEIGHT_BETWEEN_PLATFORMS,
+                    length,
+                    assets);
 
             LEVEL_PLATFORMS++;
 
@@ -172,10 +222,18 @@ public class GameScreen extends AbstractScreen {
     public void render(float delta) {
         super.render(delta);
 
-        if (first || !menuScreen.getMenuState()) {
+        if ((first || !menuScreen.getMenuState()) && !game.isPause()) {
             first = false;
             update();
         }
+
+        if (!menuScreen.getMenuState()) {
+            constantStage.addActor(pauseButton);
+            Gdx.input.setInputProcessor(constantStage);
+
+        } else
+            Gdx.input.setInputProcessor(stage);
+
 
         batch.begin();
         batch.setProjectionMatrix(camera.combined);
@@ -186,10 +244,19 @@ public class GameScreen extends AbstractScreen {
         batch.begin();
         batch.setProjectionMatrix(cameraScore.combined);
 
+        constantStage.draw();
+        batch.end();
+
+        batch.begin();
+        batch.setProjectionMatrix(cameraScore.combined);
+
         if (!menuScreen.getMenuState()) {
-            scoreLabel.setText("MARIO\n" + menuScreen.getPoints(SCORE));
+            scoreLabel.setText("MARIO\n" + menuScreen.getPoints(scoreControler.getSCORE()));
             scoreLabel.draw(batch, 1);
         }
+
+        if (game.isPause())
+            pauseLabel.draw(batch, 1);
 
         batch.end();
     }
@@ -197,13 +264,14 @@ public class GameScreen extends AbstractScreen {
     private void update() {
         stage.act();
 
-        flyingObjectControler.update(player);
-
         backgroundUpdate();
         playerUpdate();
         platformUpdate();
         cloudsUpdate();
-        addScore();
+        scoreControler.update();
+
+        flyingObjectControler.update(player);
+        flyingObjectControler.setRandomize(menuScreen.getMenuState());
     }
 
     private void backgroundUpdate() {
@@ -219,7 +287,14 @@ public class GameScreen extends AbstractScreen {
         anim.setAnimation(player.getAnimation());
 
         if (!player.getDie())
-            camera.position.set(IcyTower.SCREEN_WIDTH / 2, player.getY() + 200 + player.getJumpVelocity() / 100, 0);
+            camera.position.set(IcyTower.SCREEN_WIDTH / 2, player.getY() + 200 + player.getJumpVelocity() / 100 + cameraVelocity, 0);
+
+
+        if (player.getJumpVelocity() == 0)
+            cameraVelocity += (CAMERA_MOVEMENT_SPEED * Gdx.graphics.getDeltaTime());
+
+        else if (player.getJumpVelocity() > 0 && cameraVelocity > 0)
+            cameraVelocity -= (CAMERA_MOVEMENT_SPEED * 2 * Gdx.graphics.getDeltaTime());
 
 
         if (player.getX() > IcyTower.SCREEN_WIDTH)
@@ -239,6 +314,9 @@ public class GameScreen extends AbstractScreen {
             player.setJump(false);
             player.setJumpVelocity(300);
         }
+
+        if (player.getJumpVelocity() < 0)
+            scoreControler.setAddPoints(true);
     }
 
     private void playerRotation() {
@@ -255,42 +333,54 @@ public class GameScreen extends AbstractScreen {
     }
 
     private void playerDie() {
-        if (player.getDie()) {
-            dieTimer += Gdx.graphics.getDeltaTime();
+        if (!player.getDie() && player.getY() + player.getHeight() < camera.position.y - IcyTower.SCREEN_HEIGHT / 2) {
+            player.setDie(true);
+            player.setJump(false);
+            player.setJumpVelocity(700);
+        } else if (player.getDie() && player.getY() + player.getHeight() < camera.position.y - IcyTower.SCREEN_HEIGHT / 2)
+            die = true;
 
-            if (dieTimer > 1.1f) {
+        if (player.getDie()) {
+            if (die) {
+                pauseButton.remove();
+
                 player.setDie(false);
                 first = true;
-                menuScreen.setLastScore(SCORE);
+                die = false;
+
+                menuScreen.setLastScore(scoreControler.getSCORE());
+                cameraVelocity = 0;
 
                 try {
+                    scoreControler.increaseScore(scoreControler.getScoreToAdd());
+                    scoreControler.setScoreToAdd(0);
+
                     saveNewRecord();
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
 
-                SCORE = 0;
+                scoreControler.setSCORE(0);
 
                 player.setPosition(0, 100);
                 anim.setPosition(0, 100);
                 anim.setAnimation(player.getAnimation());
-                dieTimer = 0;
 
                 LEVEL_PLATFORMS = 1;
                 LEVEL_CLOUDS = 1;
 
                 for (Platform p : platformArray) {
+                    p.removeBlocks();
                     p.addAction(Actions.removeActor());
-                }
-
-                for (Cloud c : cloudArray) {
-                    c.addAction(Actions.removeActor());
                 }
 
                 for (Enemy e : enemyArray) {
                     e.animation.addAction(Actions.removeActor());
                     e.addAction(Actions.removeActor());
                 }
+
+                for (Cloud c : cloudArray)
+                    c.remove();
 
                 player.addAction(Actions.removeActor());
                 anim.addAction(Actions.removeActor());
@@ -310,21 +400,6 @@ public class GameScreen extends AbstractScreen {
         }
     }
 
-    private void addScore() {
-        if (player.getJumpVelocity() > 0)
-            addPoints = true;
-
-        if (add > 0) {
-            if (add < 100) {
-                SCORE += 1;
-                add -= 1;
-            } else if (add >= 100) {
-                SCORE += 10;
-                add -= 10;
-            }
-        }
-    }
-
     private void platformUpdate() {
         for (Platform p : platformArray) {
             if (isPlayerOnPlatform(p) && !player.getDie()) {
@@ -333,20 +408,35 @@ public class GameScreen extends AbstractScreen {
                 player.setY(p.getY() + p.getHeight() - 4);
                 player.setCollision(true);
 
-                if (addPoints && p.isPoints()) {
-                    add += (2 * LEVEL_PLATFORMS);
-                    addPoints = false;
+                if (scoreControler.isAddPoints() && p.isPoints()) {
+                    scoreControler.increaseScoreToAdd(2 * LEVEL_PLATFORMS);
+                    scoreControler.setAddPoints(false);
 
                     p.setPoints(false);
                 }
             }
 
-            if (player.getY() - IcyTower.SCREEN_HEIGHT * 2 > p.getY()) {
-                int length = MathUtils.random(3) + 3;
+            if (player.getY() - IcyTower.SCREEN_HEIGHT * 1.5f > p.getY()) {
+                int length = 0;
 
-                p.setSIZE(length);
-                p.setPoints(true);
-                p.setPos(stage, MathUtils.random(IcyTower.SCREEN_WIDTH - (length * 64)), LEVEL_PLATFORMS * HEIGHT_BETWEEN_PLATFORMS);
+                if (LEVEL_PLATFORMS % 10 != 0) {
+                    length = MathUtils.random(3) + 3;
+
+                    p.setSIZE(length);
+                    p.setPos(MathUtils.random(IcyTower.SCREEN_WIDTH - (length * 64)), LEVEL_PLATFORMS * HEIGHT_BETWEEN_PLATFORMS);
+                    p.onStage(stage);
+                    p.setPoints(true);
+                } else {
+                    length = 10;
+
+                    p.setSIZE(length);
+                    p.setPos(-100, LEVEL_PLATFORMS * HEIGHT_BETWEEN_PLATFORMS);
+                    p.onStage(stage);
+                    p.setPoints(true);
+                }
+
+                anim.remove();
+                stage.addActor(anim);
 
                 LEVEL_PLATFORMS++;
 
@@ -433,6 +523,7 @@ public class GameScreen extends AbstractScreen {
                     player.setJumpVelocity(1475);
                     player.setRotate(true);
                     player.setFlip(true);
+                    scoreControler.increaseScoreToAdd(LEVEL_PLATFORMS * 100);
 
                     removeEnemyArray.add(e);
                 }
@@ -465,7 +556,6 @@ public class GameScreen extends AbstractScreen {
             if (enemyTimer > 1.0f) {
                 for (Enemy e : removeEnemyArray) {
                     e.animation.addAction(Actions.removeActor());
-
                     enemyArray.remove(e);
                 }
 
@@ -476,24 +566,30 @@ public class GameScreen extends AbstractScreen {
     }
 
     private void saveNewRecord() throws FileNotFoundException {
-        if (SCORE > menuScreen.getBestScore()) {
+        if (scoreControler.getSCORE() > menuScreen.getBestScore()) {
             PrintWriter zapis = new PrintWriter("assets/bestScore.txt");
-
-            zapis.println(SCORE);
+            zapis.println(scoreControler.getSCORE());
 
             zapis.close();
         }
     }
 
     private void cloudsUpdate() {
+        Cloud cl = null;
+
         for(Cloud c : cloudArray){
             c.update();
 
-            if(player.getY() - IcyTower.SCREEN_HEIGHT > c.getY()){
-                c.setPosition(MathUtils.random(IcyTower.SCREEN_WIDTH), LEVEL_CLOUDS * IcyTower.SCREEN_HEIGHT + MathUtils.random(IcyTower.SCREEN_HEIGHT + 300) + 300);
+            if (c.getY() < camera.position.y - IcyTower.SCREEN_HEIGHT && cloudArray.size() < 2) {
+                c.setPosition(-c.getWidth(), MathUtils.random(camera.position.y, camera.position.y + IcyTower.SCREEN_HEIGHT));
+
                 c.setNewSpeed();
 
                 LEVEL_CLOUDS++;
+            }
+
+            if (c.getY() < camera.position.y - IcyTower.SCREEN_HEIGHT) {
+                cl = c;
             }
 
             if(c.getX() >= IcyTower.SCREEN_WIDTH)
@@ -501,6 +597,10 @@ public class GameScreen extends AbstractScreen {
 
             else if(c.getX() <= -c.getWidth())
                 c.setX( IcyTower.SCREEN_WIDTH );
+        }
+
+        if (cl != null) {
+            cloudArray.remove(cl);
         }
     }
 

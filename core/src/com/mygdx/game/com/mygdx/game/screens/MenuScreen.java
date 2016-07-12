@@ -56,7 +56,6 @@ public class MenuScreen {
         stage.addActor(startGameButton);
         stage.addActor(scoreLabel);
         stage.addActor(logoImage);
-
         stage.addActor(lastScoreLabel);
     }
 
