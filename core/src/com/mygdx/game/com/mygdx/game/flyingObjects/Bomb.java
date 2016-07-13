@@ -26,7 +26,7 @@ public class Bomb extends FlyingObject {
 
     private void init() {
         SPEED = 250 + MathUtils.random(50);
-        box = new Rectangle((int) getX(), (int) getY(), WIDTH, HEIGHT);
+        box = new Rectangle(getX(), getY(), WIDTH, HEIGHT);
 
         initAnimations();
     }
@@ -34,6 +34,7 @@ public class Bomb extends FlyingObject {
     protected void initAnimations() {
         if (direction)
             initRightAnimation();
+
         else
             initLeftAnimation();
     }
@@ -65,19 +66,6 @@ public class Bomb extends FlyingObject {
         frames.clear();
     }
 
-    public void update() {
-        if (!direction) {
-            this.moveBy(-SPEED * Gdx.graphics.getDeltaTime(), GRAVITY * Gdx.graphics.getDeltaTime());
-            animation.rotateBy((-GRAVITY / SPEED) * 2 * Gdx.graphics.getDeltaTime());
-        } else {
-            this.moveBy(SPEED * Gdx.graphics.getDeltaTime(), GRAVITY * Gdx.graphics.getDeltaTime());
-            animation.rotateBy((GRAVITY / SPEED) * 2 * Gdx.graphics.getDeltaTime());
-        }
-
-        animation.setPosition(this.getX(), this.getY());
-        box.setPosition((int) getX(), (int) getY());
-    }
-
     protected void initPosition() {
         int side = MathUtils.random(1);
         float y = this.getY();
@@ -97,5 +85,18 @@ public class Bomb extends FlyingObject {
             this.setPosition(x, y);
             animation.setPosition(x, y);
         }
+    }
+
+    public void update() {
+        if (!direction) {
+            this.moveBy(-SPEED * Gdx.graphics.getDeltaTime(), GRAVITY * Gdx.graphics.getDeltaTime());
+            animation.rotateBy((-GRAVITY / SPEED) * 2 * Gdx.graphics.getDeltaTime());
+        } else {
+            this.moveBy(SPEED * Gdx.graphics.getDeltaTime(), GRAVITY * Gdx.graphics.getDeltaTime());
+            animation.rotateBy((GRAVITY / SPEED) * 2 * Gdx.graphics.getDeltaTime());
+        }
+
+        animation.setPosition(this.getX(), this.getY());
+        box.setPosition(getX(), getY());
     }
 }

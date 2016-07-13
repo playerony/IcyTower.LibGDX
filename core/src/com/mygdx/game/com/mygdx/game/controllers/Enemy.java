@@ -2,6 +2,7 @@ package com.mygdx.game.com.mygdx.game.controllers;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.com.mygdx.game.entities.AnimatedImage;
 import com.mygdx.game.com.mygdx.game.entities.Entity;
@@ -10,7 +11,6 @@ import com.mygdx.game.com.mygdx.game.entities.Entity;
  * Created by pawel_000 on 2016-05-29.
  */
 public abstract class Enemy extends Entity {
-
     protected boolean move = true;
     protected float SPEED = 10;
 
@@ -33,10 +33,10 @@ public abstract class Enemy extends Entity {
     private void initEnemy() {
         animation = new AnimatedImage(getAnimation());
 
-        top = new Rectangle((int) getX(), (int) getY(), (int) getWidth(), 5);
-        bottom = new Rectangle((int) getX() + 1, (int) getY() - (int) getHeight() - 1, (int) getWidth() - 2, 5);
-        left = new Rectangle((int)getX(), (int)getY() - 5, 5, (int)getHeight() - 10);
-        right = new Rectangle((int)getX() + (int)getWidth() - 5, (int)getY() - 5, 5, (int)getHeight() - 10);
+        top = new Rectangle(getX(), getY(), getWidth(), 5);
+        bottom = new Rectangle(getX() + 1, getY() - getHeight() - 1, getWidth() - 2, 5);
+        left = new Rectangle(getX(), getY() - 5, 5, getHeight() - 10);
+        right = new Rectangle(getX() + getWidth() - 5, getY() - 5, 5, getHeight() - 10);
     }
 
     protected abstract void initAnimations();
@@ -81,6 +81,8 @@ public abstract class Enemy extends Entity {
 
     public void setSPEED(float speed) {
         this.SPEED = speed;
+
+        SPEED += MathUtils.random(-2, 4);
     }
 
     public enum State {MOVE, DIE}

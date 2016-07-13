@@ -28,7 +28,6 @@ import java.util.ArrayList;
  * Created by pawel_000 on 2016-05-24.
  */
 public class GameScreen extends AbstractScreen {
-
     private static final String PAUSE_INFORMATION_BUTTON_TEXT = "PAUSE";
     private static final String PAUSE_BUTTON_TEXT = "P";
     private static final int HEIGHT_BETWEEN_PLATFORMS = 200;
@@ -69,18 +68,24 @@ public class GameScreen extends AbstractScreen {
     public GameScreen(IcyTower game){
         super(game);
 
+        initAssets();
+    }
+
+    private void initAssets() {
         assets = new Asset();
         assets.load();
         assets.manager.finishLoading();
 
         if (assets.manager.update())
             init();
+        else
+            return;
 
         logoTexture = assets.manager.get("assets/logo.png", Texture.class);
     }
 
     public void init() {
-        constantStage = new Stage(new StretchViewport(IcyTower.SCREEN_WIDTH, IcyTower.SCREEN_HEIGHT, cameraScore));
+        initConstantStage();
 
         initClouds();
         initPlatforms();
@@ -100,6 +105,10 @@ public class GameScreen extends AbstractScreen {
         initPauseButton();
 
         initFlyingObjectControler();
+    }
+
+    private void initConstantStage() {
+        constantStage = new Stage(new StretchViewport(IcyTower.SCREEN_WIDTH, IcyTower.SCREEN_HEIGHT, cameraScore));
     }
 
     private void initPauseButton() {
@@ -216,19 +225,7 @@ public class GameScreen extends AbstractScreen {
     @Override
     public void render(float delta) {
         super.render(delta);
-
-        if ((first || !menuScreen.getMenuState()) && !game.isPause()) {
-            first = false;
-            update();
-        }
-
-        if (!menuScreen.getMenuState()) {
-            constantStage.addActor(pauseButton);
-            Gdx.input.setInputProcessor(constantStage);
-
-        } else
-            Gdx.input.setInputProcessor(stage);
-
+        renderUpdate();
 
         batch.begin();
         batch.setProjectionMatrix(camera.combined);
@@ -236,24 +233,41 @@ public class GameScreen extends AbstractScreen {
         stage.draw();
         batch.end();
 
+
         batch.begin();
         batch.setProjectionMatrix(cameraScore.combined);
 
         constantStage.draw();
         batch.end();
+    }
 
-        batch.begin();
-        batch.setProjectionMatrix(cameraScore.combined);
+    private void renderUpdate() {
+        if ((first || !menuScreen.getMenuState()) && !game.isPause()) {
+            first = false;
+            update();
+        }
 
         if (!menuScreen.getMenuState()) {
             scoreLabel.setText("MARIO\n" + menuScreen.getPoints(scoreControler.getSCORE()));
-            scoreLabel.draw(batch, 1);
+
+            constantStage.addActor(pauseButton);
+            constantStage.addActor(scoreLabel);
+
+            if (game.isPause()) {
+                constantStage.addActor(pauseLabel);
+                flyingObjectControler.setRandomize(true);
+
+            } else {
+                pauseLabel.remove();
+                flyingObjectControler.setRandomize(false);
+            }
+
+            Gdx.input.setInputProcessor(constantStage);
+
+        } else {
+            scoreLabel.remove();
+            Gdx.input.setInputProcessor(stage);
         }
-
-        if (game.isPause())
-            pauseLabel.draw(batch, 1);
-
-        batch.end();
     }
 
     private void update() {
@@ -520,8 +534,11 @@ public class GameScreen extends AbstractScreen {
         Enemy mob = null;
 
         for (Enemy e : enemyArray) {
-            if (isEnemyOnPlatform(e, p) && (e.getX() > p.getX() + p.getBounds().getWidth() - e.getWidth() || e.getX() < p.getX()))
+            if (isEnemyOnPlatform(e, p) && (e.getX() + (e.getSPEED() * 2 * Gdx.graphics.getDeltaTime()) >= p.getX() + p.getBounds().getWidth() - e.getWidth()
+                    || e.getX() - (e.getSPEED() * 2 * Gdx.graphics.getDeltaTime()) <= p.getX()))
                 e.oppositeSPEED();
+
+            e.update();
 
             if (!player.getDie() && e.getMove()) {
                 if (player.getBottomBound().overlaps(e.getTopBound())) {
@@ -549,11 +566,8 @@ public class GameScreen extends AbstractScreen {
                 }
             }
 
-            if (player.getY() - IcyTower.SCREEN_HEIGHT * 1.3f > e.getY()) {
+            if (player.getY() - IcyTower.SCREEN_HEIGHT * 1.2f > e.getY())
                 mob = e;
-            }
-
-            e.update();
         }
 
         if (mob != null) {

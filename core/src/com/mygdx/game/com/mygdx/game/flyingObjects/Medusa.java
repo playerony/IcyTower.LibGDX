@@ -19,7 +19,6 @@ public class Medusa extends FlyingObject {
     private static final int HEIGHT = 56;
 
     private static int MULTIPLER = 1;
-
     private static float timer = 0.0f;
 
     private boolean jump = false;
@@ -115,6 +114,6 @@ public class Medusa extends FlyingObject {
         }
 
         animation.setPosition(this.getX(), this.getY());
-        box.setPosition((int) getX(), (int) getY());
+        box.setPosition(getX(), getY());
     }
 }

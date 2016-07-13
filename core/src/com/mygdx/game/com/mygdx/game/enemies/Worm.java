@@ -19,6 +19,7 @@ public class Worm extends Enemy {
 
     public Worm(float x, float y, final Texture texture) {
         super(texture, x, y, WIDTH, HEIGHT);
+
     }
 
     public void initAnimations() {
@@ -41,6 +42,7 @@ public class Worm extends Enemy {
 
     @Override
     public void die() {
+
         this.setMove(false);
     }
 
@@ -48,9 +50,8 @@ public class Worm extends Enemy {
         Animation result = enemyRun;
 
         switch (getState()) {
-            case MOVE: {
+            case MOVE:
                 result = enemyRun;
-            }
             break;
 
             case DIE:
@@ -63,12 +64,14 @@ public class Worm extends Enemy {
     }
 
     public void oppositeSPEED() {
+
         SPEED = -SPEED;
     }
 
     private State getState() {
         if (move)
             return State.MOVE;
+
         else
             return State.DIE;
     }
@@ -77,10 +80,10 @@ public class Worm extends Enemy {
         if (move) {
             this.moveBy(SPEED * Gdx.graphics.getDeltaTime(), 0);
 
-            top.setPosition((int) getX(), (int) getY());
-            bottom.setPosition((int) getX() + 1, (int) getY() - (int) getHeight() + 1);
-            left.setPosition((int) getX(), (int) getY() - 5);
-            right.setPosition((int) getX() + (int) getWidth() - 5, (int) getY() - 5);
+            top.setPosition(getX(), getY());
+            bottom.setPosition(getX() + 1, getY() - getHeight() + 1);
+            left.setPosition(getX(), getY() - 5);
+            right.setPosition(getX() + getWidth() - 5, getY() - 5);
 
             animation.setPosition(this.getX(), this.getY());
         } else

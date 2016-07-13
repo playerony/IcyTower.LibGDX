@@ -13,7 +13,6 @@ import com.mygdx.game.com.mygdx.game.controllers.Enemy;
 public class Turtle extends Enemy {
     private static final int WIDTH = 48;
     private static final int HEIGHT = 48;
-    private static final float GRAVITY = -(9.81f * 2.5f);
 
     private boolean hide = false;
 
@@ -23,18 +22,27 @@ public class Turtle extends Enemy {
 
     public Turtle(float x, float y, final Texture texture) {
         super(texture, x, y, WIDTH, HEIGHT);
+
     }
 
     protected void initAnimations() {
+        initLeftSideAnimation();
+        initRightSideAnimation();
+        initDieAnimation();
+    }
+
+    private void initDieAnimation() {
         Array<TextureRegion> frames = new Array<TextureRegion>();
 
-        for (int i = 0; i < 2; i++) {
-            TextureRegion region = new TextureRegion(texture, i * WIDTH, 0, WIDTH, HEIGHT);
-            frames.add(region);
-        }
+        TextureRegion region = new TextureRegion(texture, 2 * WIDTH, 0, WIDTH, HEIGHT);
+        frames.add(region);
 
-        enemyRunLeft = new Animation(0.1f, frames);
+        enemyDie = new Animation(0.1f, frames);
         frames.clear();
+    }
+
+    private void initRightSideAnimation() {
+        Array<TextureRegion> frames = new Array<TextureRegion>();
 
         for (int i = 0; i < 2; i++) {
             TextureRegion region = new TextureRegion(texture, i * WIDTH, 0, WIDTH, HEIGHT);
@@ -44,11 +52,17 @@ public class Turtle extends Enemy {
 
         enemyRunRight = new Animation(0.1f, frames);
         frames.clear();
+    }
 
-        TextureRegion region = new TextureRegion(texture, 2 * WIDTH, 0, WIDTH, HEIGHT);
-        frames.add(region);
+    private void initLeftSideAnimation() {
+        Array<TextureRegion> frames = new Array<TextureRegion>();
 
-        enemyDie = new Animation(0.1f, frames);
+        for (int i = 0; i < 2; i++) {
+            TextureRegion region = new TextureRegion(texture, i * WIDTH, 0, WIDTH, HEIGHT);
+            frames.add(region);
+        }
+
+        enemyRunLeft = new Animation(0.1f, frames);
         frames.clear();
     }
 
@@ -82,15 +96,16 @@ public class Turtle extends Enemy {
     private State getState() {
         if (move && !hide)
             return State.MOVE;
+
         else if (move && hide)
             return State.DIE;
+
         else
             return State.DIE;
     }
 
     public void oppositeSPEED() {
         SPEED = -SPEED;
-
         direction = !direction;
 
         animation.setAnimation(getAnimation());
@@ -100,10 +115,10 @@ public class Turtle extends Enemy {
         if (move) {
             this.moveBy(SPEED * Gdx.graphics.getDeltaTime(), 0);
 
-            top.setPosition((int) getX(), (int) getY());
-            bottom.setPosition((int) getX() + 1, (int) getY() - (int) getHeight() + 1);
-            left.setPosition((int) getX(), (int) getY() - 5);
-            right.setPosition((int) getX() + (int) getWidth() - 5, (int) getY() - 5);
+            top.setPosition(getX(), getY());
+            bottom.setPosition(getX() + 1, getY() - getHeight() + 1);
+            left.setPosition(getX(), getY() - 5);
+            right.setPosition(getX() + getWidth() - 5, getY() - 5);
 
             animation.setPosition(this.getX(), this.getY());
         } else

@@ -9,13 +9,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 public abstract class Entity extends Image {
     protected final float GRAVITY = -(9.81f * 2.5f);
     public AnimatedImage animation;
-    protected Texture texture;
     protected boolean direction = true;
+    protected Texture texture;
 
-    public Entity(Texture texture, float x, float y, final int WIDTH, final int HEIGHT) {
+    public Entity(final Texture texture, float x, float y, final int WIDTH, final int HEIGHT) {
         super(texture);
 
-        this.texture = texture;
+        setTexture(texture);
         this.setPosition(x, y);
         this.setSize(WIDTH, HEIGHT);
         this.setOrigin(WIDTH / 2, HEIGHT / 2);

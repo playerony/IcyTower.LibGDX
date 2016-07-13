@@ -15,28 +15,36 @@ public class Player extends Entity {
     private static final int WIDTH = 64;
     private static final int HEIGHT = 64;
     private static final int JUMP_VELOCITY = 800;
+
     private static final float START_X = 25.0f;
     private static final float START_Y = 36.5f;
+
     private float angle = 0.0f;
     private float jumpVelocity;
     private float runVelocity;
+
     private boolean collision = false;
     private boolean rotate = false;
     private boolean floor = false;
     private boolean flip = false;
     private boolean die = false;
     private boolean jump = true;
+
     private State currentState;
     private Direction direction;
+
     private Animation playerRunRight;
     private Animation playerJumpRight;
     private Animation playerStandingRight;
     private Animation playerFlipRight;
+
     private Animation playerRunLeft;
     private Animation playerJumpLeft;
     private Animation playerStandingLeft;
     private Animation playerFlipLeft;
+
     private Animation playerDie;
+
     private Rectangle box;
     private Rectangle bottom;
     private Rectangle top;
@@ -236,7 +244,7 @@ public class Player extends Entity {
     }
 
     private State getState() {
-        if (runVelocity != 0 && (jumpVelocity == 0 || floor) && !die && !flip)
+        if (runVelocity != 0 && floor && !die && !flip && jumpVelocity == 0)
             return State.RUNNING;
 
         else if (jumpVelocity > 0 && !die && !flip)
@@ -261,6 +269,7 @@ public class Player extends Entity {
 
             this.moveBy(runVelocity, 0);
             direction = Direction.LEFT;
+
         } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && !die) {
             runVelocity = 500 * Gdx.graphics.getDeltaTime();
 

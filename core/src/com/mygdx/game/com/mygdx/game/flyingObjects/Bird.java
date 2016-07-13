@@ -18,6 +18,10 @@ public class Bird extends FlyingObject {
     private static final int WIDTH = 48;
     private static final int HEIGHT = 48;
 
+    private static final int JUMP_VELOCITY = 400;
+    private static final float MIN_TIME_RANGE = 0.3f;
+    private static final float MAX_TIME_RANGE = 0.8f;
+
     private float timer = 0.0f;
     private float time = 0.0f;
     private float jumpVelocity = 0.0f;
@@ -30,7 +34,7 @@ public class Bird extends FlyingObject {
 
     private void init() {
         SPEED = 70 + MathUtils.random(30);
-        box = new Rectangle((int) getX(), (int) getY(), WIDTH, HEIGHT);
+        box = new Rectangle(getX(), getY(), WIDTH, HEIGHT);
 
         initAnimations();
     }
@@ -79,14 +83,14 @@ public class Bird extends FlyingObject {
         timer += Gdx.graphics.getDeltaTime();
 
         if (timer > time) {
-            jumpVelocity = 400;
+            jumpVelocity = JUMP_VELOCITY;
 
             timer = 0;
-            time = MathUtils.random(0.3f, 0.8f);
+            time = MathUtils.random(MIN_TIME_RANGE, MAX_TIME_RANGE);
         }
 
         animation.setPosition(this.getX(), this.getY());
-        box.setPosition((int) getX(), (int) getY());
+        box.setPosition(getX(), getY());
     }
 
     protected void initPosition() {
@@ -106,9 +110,5 @@ public class Bird extends FlyingObject {
 
         this.setPosition(x, y);
         animation.setPosition(x, y);
-    }
-
-    public Animation getAnimation() {
-        return null;
     }
 }
