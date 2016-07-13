@@ -82,7 +82,7 @@ public class Bird extends FlyingObject {
             jumpVelocity = 400;
 
             timer = 0;
-            time = MathUtils.random(0.4f, 0.8f);
+            time = MathUtils.random(0.3f, 0.8f);
         }
 
         animation.setPosition(this.getX(), this.getY());

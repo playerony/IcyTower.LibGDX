@@ -13,13 +13,17 @@ public class Asset implements Disposable {
 
     public void load() {
         manager.load("assets/mario.png", Texture.class);
-        manager.load("assets/brick.png", Texture.class);
-        manager.load("assets/questionMark.png", Texture.class);
         manager.load("assets/cloud.png", Texture.class);
         manager.load("assets/font.png", Texture.class);
         manager.load("assets/moutain.png", Texture.class);
         manager.load("assets/floor.png", Texture.class);
         manager.load("assets/logo.png", Texture.class);
+
+        manager.load("assets/brick.png", Texture.class);
+        manager.load("assets/brick_blue.png", Texture.class);
+        manager.load("assets/brick_green.png", Texture.class);
+        manager.load("assets/brick_grey.png", Texture.class);
+        manager.load("assets/questionMark.png", Texture.class);
 
         manager.load("assets/mob_1_red.png", Texture.class);
         manager.load("assets/mob_1_blue.png", Texture.class);

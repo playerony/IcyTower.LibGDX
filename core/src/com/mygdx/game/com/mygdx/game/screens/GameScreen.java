@@ -35,13 +35,12 @@ public class GameScreen extends AbstractScreen {
     private static final float CAMERA_MOVEMENT_SPEED = 10;
     private static final int PLATFORMS = 12;
     private static float enemyTimer = 0;
-    private static int POINTS_FOR_ENEMY = 0;
     private static int AMOUT_OF_ENEMIES = 0;
     private static int LEVEL_CLOUDS = 1;
     private static int LEVEL_PLATFORMS = 1;
+    private static int LAST_NUMBER_OF_BLOCK = 0;
+    private static int NUMBER_OF_BLOCK = 0;
     private float cameraVelocity = 0.0f;
-    private int CLOUDS = 1;
-
     private boolean first = true;
     private boolean die = false;
 
@@ -55,13 +54,13 @@ public class GameScreen extends AbstractScreen {
     private TextButton pauseButton;
 
     private Floor floor;
+    private Cloud cloud;
     private Player player;
     private MenuScreen menuScreen;
     private ScoreControler scoreControler;
     private FlyingObjectControler flyingObjectControler;
 
     private ArrayList<Platform> platformArray;
-    private ArrayList<Cloud> cloudArray;
     private ArrayList<Enemy> enemyArray;
     private ArrayList<Enemy> removeEnemyArray;
 
@@ -152,19 +151,15 @@ public class GameScreen extends AbstractScreen {
     }
 
     private void initClouds() {
-        cloudArray = new ArrayList<>();
+        cloud = null;
 
-        for (int i = 0; i < CLOUDS; i++) {
-            Cloud c = null;
-            c = new Cloud(MathUtils.random(IcyTower.SCREEN_WIDTH),
-                    LEVEL_CLOUDS * IcyTower.SCREEN_HEIGHT + MathUtils.random(IcyTower.SCREEN_HEIGHT + 300) + 300,
-                    assets.manager.get("assets/cloud.png", Texture.class));
+        cloud = new Cloud(MathUtils.random(IcyTower.SCREEN_WIDTH),
+                LEVEL_CLOUDS * IcyTower.SCREEN_HEIGHT + MathUtils.random(IcyTower.SCREEN_HEIGHT + 300) + 300,
+                assets.manager.get("assets/cloud.png", Texture.class));
 
-            LEVEL_CLOUDS++;
+        LEVEL_CLOUDS++;
 
-            stage.addActor(c);
-            cloudArray.add(c);
-        }
+        stage.addActor(cloud);
     }
 
     private void initPlatforms() {
@@ -309,7 +304,7 @@ public class GameScreen extends AbstractScreen {
         playerDie();
         playerRotation();
 
-        if (player.getJumpVelocity() < -1500) {
+        if (player.getJumpVelocity() < -1200) {
             player.setDie(true);
             player.setJump(false);
             player.setJumpVelocity(300);
@@ -321,14 +316,14 @@ public class GameScreen extends AbstractScreen {
 
     private void playerRotation() {
         if (player.getRotate()) {
-            if (player.angle > 360) {
-                player.angle = 0;
+            if (player.getAngle() > 360) {
+                player.setAngle(0.0f);
                 player.setRotate(false);
                 player.setFlip(false);
             }
 
-            anim.setRotation(player.angle);
-            player.angle += 10.25f;
+            anim.setRotation(player.getAngle());
+            player.setAngle(player.getAngle() + 10.25f);
         }
     }
 
@@ -337,6 +332,7 @@ public class GameScreen extends AbstractScreen {
             player.setDie(true);
             player.setJump(false);
             player.setJumpVelocity(700);
+
         } else if (player.getDie() && player.getY() + player.getHeight() < camera.position.y - IcyTower.SCREEN_HEIGHT / 2)
             die = true;
 
@@ -379,14 +375,14 @@ public class GameScreen extends AbstractScreen {
                     e.addAction(Actions.removeActor());
                 }
 
-                for (Cloud c : cloudArray)
-                    c.remove();
+                cloud.addAction(Actions.removeActor());
+                cloud.remove();
 
                 player.addAction(Actions.removeActor());
                 anim.addAction(Actions.removeActor());
 
                 platformArray.clear();
-                cloudArray.clear();
+                cloud.clear();
                 enemyArray.clear();
 
                 camera.position.set(IcyTower.SCREEN_WIDTH / 2, player.getY() + 200 + player.getJumpVelocity() / 100, 0);
@@ -416,12 +412,13 @@ public class GameScreen extends AbstractScreen {
                 }
             }
 
-            if (player.getY() - IcyTower.SCREEN_HEIGHT * 1.5f > p.getY()) {
+            if (player.getY() - IcyTower.SCREEN_HEIGHT * 1.2f > p.getY()) {
                 int length = 0;
 
                 if (LEVEL_PLATFORMS % 10 != 0) {
                     length = MathUtils.random(3) + 3;
 
+                    p.setBricks(NUMBER_OF_BLOCK);
                     p.setSIZE(length);
                     p.setPos(MathUtils.random(IcyTower.SCREEN_WIDTH - (length * 64)), LEVEL_PLATFORMS * HEIGHT_BETWEEN_PLATFORMS);
                     p.onStage(stage);
@@ -429,6 +426,8 @@ public class GameScreen extends AbstractScreen {
                 } else {
                     length = 10;
 
+                    randomNewStage();
+                    p.setBricks(NUMBER_OF_BLOCK);
                     p.setSIZE(length);
                     p.setPos(-100, LEVEL_PLATFORMS * HEIGHT_BETWEEN_PLATFORMS);
                     p.onStage(stage);
@@ -448,6 +447,13 @@ public class GameScreen extends AbstractScreen {
 
             enemyUpdate(p);
         }
+    }
+
+    private void randomNewStage() {
+        do {
+            LAST_NUMBER_OF_BLOCK = NUMBER_OF_BLOCK;
+            NUMBER_OF_BLOCK = MathUtils.random(3);
+        } while (LAST_NUMBER_OF_BLOCK != NUMBER_OF_BLOCK);
     }
 
     private void getRandomEnemy(Platform p) {
@@ -511,11 +517,11 @@ public class GameScreen extends AbstractScreen {
     }
 
     private void enemyUpdate(Platform p) {
-        for(Enemy e : enemyArray) {
+        Enemy mob = null;
 
-            if (isEnemyOnPlatform(e, p) && (e.getX() > p.getX() + p.getBounds().getWidth() - e.getWidth() || e.getX() < p.getX())) {
+        for (Enemy e : enemyArray) {
+            if (isEnemyOnPlatform(e, p) && (e.getX() > p.getX() + p.getBounds().getWidth() - e.getWidth() || e.getX() < p.getX()))
                 e.oppositeSPEED();
-            }
 
             if (!player.getDie() && e.getMove()) {
                 if (player.getBottomBound().overlaps(e.getTopBound())) {
@@ -543,7 +549,16 @@ public class GameScreen extends AbstractScreen {
                 }
             }
 
+            if (player.getY() - IcyTower.SCREEN_HEIGHT * 1.3f > e.getY()) {
+                mob = e;
+            }
+
             e.update();
+        }
+
+        if (mob != null) {
+            mob.animation.addAction(Actions.removeActor());
+            enemyArray.remove(mob);
         }
 
         enemyDie();
@@ -575,33 +590,22 @@ public class GameScreen extends AbstractScreen {
     }
 
     private void cloudsUpdate() {
-        Cloud cl = null;
+        cloud.update();
 
-        for(Cloud c : cloudArray){
-            c.update();
+        if (cloud.getY() < camera.position.y - IcyTower.SCREEN_HEIGHT) {
+            cloud.setPosition(-cloud.getWidth(), MathUtils.random(camera.position.y, camera.position.y + IcyTower.SCREEN_HEIGHT));
 
-            if (c.getY() < camera.position.y - IcyTower.SCREEN_HEIGHT && cloudArray.size() < 2) {
-                c.setPosition(-c.getWidth(), MathUtils.random(camera.position.y, camera.position.y + IcyTower.SCREEN_HEIGHT));
+            cloud.setNewSpeed();
 
-                c.setNewSpeed();
-
-                LEVEL_CLOUDS++;
-            }
-
-            if (c.getY() < camera.position.y - IcyTower.SCREEN_HEIGHT) {
-                cl = c;
-            }
-
-            if(c.getX() >= IcyTower.SCREEN_WIDTH)
-                c.setX( -c.getWidth() );
-
-            else if(c.getX() <= -c.getWidth())
-                c.setX( IcyTower.SCREEN_WIDTH );
+            LEVEL_CLOUDS++;
         }
 
-        if (cl != null) {
-            cloudArray.remove(cl);
-        }
+        if (cloud.getX() >= IcyTower.SCREEN_WIDTH)
+            cloud.setX(-cloud.getWidth());
+
+        else if (cloud.getX() <= -cloud.getWidth())
+            cloud.setX(IcyTower.SCREEN_WIDTH);
+
     }
 
     private boolean isEnemyOnPlatform(Enemy e, Platform p) {

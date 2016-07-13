@@ -16,19 +16,18 @@ public class Platform extends Image {
 
     private static final int WIDTH = 64;
     private static final int HEIGHT = 64;
-
+    private static Bricks bricks;
     private static int SIZE = 0;
     private static float posX = 0;
     private static float posY = 0;
-
     private boolean points = true;
-
     private Rectangle bounds;
     private Array<Block> blocks;
-
     private Texture brickTexture;
+    private Texture blueBrickTexture;
+    private Texture greyBrickTexture;
+    private Texture greenBrickTexture;
     private Texture questionMarkTexture;
-
     public Platform(float x, float y, int size, Asset assets) {
         SIZE = size;
 
@@ -44,17 +43,25 @@ public class Platform extends Image {
 
     private void initTextures(Asset assets) {
         brickTexture = assets.manager.get("assets/brick.png", Texture.class);
+        blueBrickTexture = assets.manager.get("assets/brick_blue.png", Texture.class);
+        greenBrickTexture = assets.manager.get("assets/brick_green.png", Texture.class);
+        greyBrickTexture = assets.manager.get("assets/brick_grey.png", Texture.class);
+
         questionMarkTexture = assets.manager.get("assets/questionMark.png", Texture.class);
     }
 
     private void init(){
         blocks = new Array<Block>();
 
+        int value = 0;
+        int lastValue = 0;
+
         for(int i=0 ; i<SIZE ; i++){
-            int value = MathUtils.random(10);
+            lastValue = value;
+            value = MathUtils.random(10);
             Block b = null;
 
-            if (value == 3 && i > 0 && i < SIZE - 1)
+            if (value == 3 && i > 0 && i < SIZE - 1 && value != lastValue)
                 b = new Block(posX + (i * WIDTH), posY, WIDTH, HEIGHT, questionMarkTexture);
 
             else
@@ -103,10 +110,32 @@ public class Platform extends Image {
                 b = new Block(posX + (i * WIDTH), posY, WIDTH, HEIGHT, questionMarkTexture);
 
             else
-                b = new Block(posX + (i * WIDTH), posY, WIDTH, HEIGHT, brickTexture);
+                b = new Block(posX + (i * WIDTH), posY, WIDTH, HEIGHT, getTexture());
 
             blocks.add(b);
         }
+    }
+
+    private Texture getTexture() {
+        switch (bricks) {
+            case RED: {
+                return brickTexture;
+            }
+
+            case BLUE: {
+                return blueBrickTexture;
+            }
+
+            case GREEN: {
+                return greenBrickTexture;
+            }
+
+            case GREY: {
+                return greyBrickTexture;
+            }
+        }
+
+        return brickTexture;
     }
 
     public void setPos(float x, float y) {
@@ -130,6 +159,19 @@ public class Platform extends Image {
         this.setY(y);
     }
 
+    public void setBricks(final int value) {
+
+        if (value == 0) {
+            bricks = Bricks.RED;
+        } else if (value == 1) {
+            bricks = Bricks.GREEN;
+        } else if (value == 2) {
+            bricks = Bricks.BLUE;
+        } else {
+            bricks = Bricks.GREY;
+        }
+    }
+
     public boolean isPoints() {
         return points;
     }
@@ -137,4 +179,6 @@ public class Platform extends Image {
     public void setPoints(boolean points) {
         this.points = points;
     }
+
+    private enum Bricks {RED, GREEN, GREY, BLUE}
 }

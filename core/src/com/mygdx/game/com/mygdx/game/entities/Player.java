@@ -12,66 +12,58 @@ import com.badlogic.gdx.utils.Array;
  * Created by pawel_000 on 2016-05-24.
  */
 public class Player extends Entity {
-
     private static final int WIDTH = 64;
     private static final int HEIGHT = 64;
     private static final int JUMP_VELOCITY = 800;
     private static final float START_X = 25.0f;
     private static final float START_Y = 36.5f;
-    public float angle = 0.0f;
+    private float angle = 0.0f;
     private float jumpVelocity;
     private float runVelocity;
-    private State currentState;
-    private Direction direction;
-
     private boolean collision = false;
     private boolean rotate = false;
-    private boolean jump = true;
     private boolean floor = false;
-    private boolean die = false;
     private boolean flip = false;
-
+    private boolean die = false;
+    private boolean jump = true;
+    private State currentState;
+    private Direction direction;
     private Animation playerRunRight;
     private Animation playerJumpRight;
     private Animation playerStandingRight;
     private Animation playerFlipRight;
-
     private Animation playerRunLeft;
     private Animation playerJumpLeft;
     private Animation playerStandingLeft;
     private Animation playerFlipLeft;
     private Animation playerDie;
-
     private Rectangle box;
     private Rectangle bottom;
     private Rectangle top;
     private Rectangle left;
     private Rectangle right;
 
-    public Player(Texture texture) {
+    public Player(final Texture texture) {
         super(texture, START_X, START_Y, WIDTH, HEIGHT);
-
-        this.setOrigin(WIDTH / 2, HEIGHT / 2);
 
         init();
     }
 
-    protected void init() {
+    private void init() {
         currentState = State.STANDING;
-
-        initRightAnimations();
-        initLeftAnimations();
-
-        box = new Rectangle((int) getX(), (int) getY(), (int) getWidth(), (int) getHeight());
-        top = new Rectangle((int)getX() + 5, (int)getY(), (int)getWidth() - 10, 5);
-        bottom = new Rectangle((int) getX() + 1, (int) getY() - (int) getHeight() + 10, (int) getWidth() - 2, 10);
-        left = new Rectangle((int)getX(), (int)getY() - 5, 5, (int)getHeight() - 10);
-        right = new Rectangle((int)getX() + (int)getWidth() - 5, (int)getY() - 5, 5, (int)getHeight() - 10);
-
         direction = Direction.RIGHT;
+
+        initRightSideAnimations();
+        initLeftSideAnimations();
+
+        box = new Rectangle(getX(), getY(), WIDTH, HEIGHT);
+        top = new Rectangle(getX() + 5, getY(), WIDTH - 10, 5);
+        bottom = new Rectangle(getX() + 1, getY() - HEIGHT + 10, WIDTH - 2, 10);
+        left = new Rectangle(getX(), getY() - 5, 5, getHeight() - 10);
+        right = new Rectangle(getX() + WIDTH - 5, getY() - 5, 5, HEIGHT - 10);
     }
 
-    private void initLeftAnimations() {
+    private void initLeftSideAnimations() {
         Array<TextureRegion> frames = new Array<TextureRegion>();
 
         ///////////////////////////
@@ -115,7 +107,7 @@ public class Player extends Entity {
         frames.clear();
     }
 
-    private void initRightAnimations() {
+    private void initRightSideAnimations() {
         Array<TextureRegion> frames = new Array<TextureRegion>();
 
         ///////////////////////////
@@ -162,9 +154,10 @@ public class Player extends Entity {
         if(!collision)
             move();
 
-        if (this.getY() > START_Y) {
+        if (this.getY() > START_Y || die) {
             jumpVelocity += GRAVITY;
             collision = false;
+
         } else {
             this.setY(START_Y);
             jumpVelocity = 0;
@@ -172,11 +165,11 @@ public class Player extends Entity {
             floor = true;
         }
 
-        box.setPosition((int) getX(), (int) getY());
-        bottom.setPosition((int) getX() + 1, (int) getY() - (int) getHeight() + 5);
-        top.setPosition((int)getX() + 5, (int)getY());
-        left.setPosition((int)getX(), (int)getY() - 5);
-        right.setPosition((int)getX() + (int)getWidth() - 5, (int)getY() - 5);
+        box.setPosition(getX(), getY());
+        bottom.setPosition(getX() + 1, getY() - HEIGHT + 5);
+        top.setPosition(getX() + 5, getY());
+        left.setPosition(getX(), getY() - 5);
+        right.setPosition(getX() + WIDTH - 5, getY() - 5);
     }
 
     public Animation getAnimation(){
@@ -207,6 +200,7 @@ public class Player extends Entity {
                     result = playerStandingRight;
                     break;
             }
+
         } else if(direction == Direction.LEFT) {
             switch (currentState) {
                 case JUMPING:
@@ -236,7 +230,8 @@ public class Player extends Entity {
         return result;
     }
 
-    public void move(){
+    private void move() {
+
         this.moveBy(0, jumpVelocity * Gdx.graphics.getDeltaTime());
     }
 
@@ -261,14 +256,12 @@ public class Player extends Entity {
     }
 
     private void inputHandler(){
-        if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT) && !die) {
             runVelocity = -1 * 500 * Gdx.graphics.getDeltaTime();
 
             this.moveBy(runVelocity, 0);
             direction = Direction.LEFT;
-        }
-
-        else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && !die) {
             runVelocity = 500 * Gdx.graphics.getDeltaTime();
 
             this.moveBy(runVelocity, 0);
@@ -278,7 +271,8 @@ public class Player extends Entity {
         else
             runVelocity = 0;
 
-        if(Gdx.input.isKeyPressed(Input.Keys.SPACE)){
+
+        if (Gdx.input.isKeyPressed(Input.Keys.SPACE) && !die) {
             runVelocity = 0;
             jump();
         }
@@ -291,16 +285,6 @@ public class Player extends Entity {
         }
     }
 
-    public Rectangle getTopBound() {
-        return top;
-    }
-
-    public Rectangle getBottomBound() {
-        return bottom;
-    }
-
-    //////////// GETTERS
-
     public Rectangle getLeftBound() {
         return left;
     }
@@ -309,12 +293,22 @@ public class Player extends Entity {
         return right;
     }
 
+    //////////// GETTERS
+
     public float getJumpVelocity() {
         return jumpVelocity;
     }
 
     public void setJumpVelocity(float velocity) {
         this.jumpVelocity = velocity;
+    }
+
+    public float getAngle() {
+        return angle;
+    }
+
+    public void setAngle(float angle) {
+        this.angle = angle;
     }
 
     public boolean getRotate() {
@@ -325,7 +319,9 @@ public class Player extends Entity {
         this.rotate = rotate;
     }
 
-    //////////// SETTERS
+    public Rectangle getRectangleBox() {
+        return box;
+    }
 
     public boolean getDie() {
         return die;
@@ -335,8 +331,14 @@ public class Player extends Entity {
         this.die = die;
     }
 
-    public Rectangle getRectangleBox() {
-        return box;
+    //////////// SETTERS
+
+    public Rectangle getTopBound() {
+        return top;
+    }
+
+    public Rectangle getBottomBound() {
+        return bottom;
     }
 
     public void setJump(boolean jump) {

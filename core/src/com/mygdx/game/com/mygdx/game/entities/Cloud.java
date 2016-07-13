@@ -2,6 +2,7 @@ package com.mygdx.game.com.mygdx.game.entities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
 /**
@@ -23,7 +24,13 @@ public class Cloud extends Image{
     }
 
     public void setNewSpeed(){
-        SPEED = 100;
+        int value = MathUtils.random(1);
+
+        if (value == 0)
+            SPEED = 100;
+        else
+            SPEED = -100;
+
     }
 
     public void update(){

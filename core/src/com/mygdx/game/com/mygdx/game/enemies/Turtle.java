@@ -26,8 +26,6 @@ public class Turtle extends Enemy {
     }
 
     protected void initAnimations() {
-        System.out.printf("Turtle animation\n");
-
         Array<TextureRegion> frames = new Array<TextureRegion>();
 
         for (int i = 0; i < 2; i++) {
