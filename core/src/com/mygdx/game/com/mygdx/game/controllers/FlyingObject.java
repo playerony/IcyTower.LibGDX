@@ -1,7 +1,6 @@
 package com.mygdx.game.com.mygdx.game.controllers;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.com.mygdx.game.entities.Entity;
 
@@ -10,8 +9,6 @@ import com.mygdx.game.com.mygdx.game.entities.Entity;
  */
 public abstract class FlyingObject extends Entity {
     protected float SPEED = 50;
-
-    protected Animation objectMoveAnimation;
     protected Rectangle box;
 
     public FlyingObject(final Texture texture, float x, float y, int WIDTH, int HEIGHT) {

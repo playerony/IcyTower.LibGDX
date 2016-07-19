@@ -32,7 +32,7 @@ public class MenuScreen {
     private int BEST_SCORE = 0;
     private boolean menu = true;
 
-    public MenuScreen(Stage stage, Texture logoTexture) {
+    public MenuScreen(Stage stage, final Texture logoTexture) {
         logoImage = new Image(logoTexture);
 
         init(stage);

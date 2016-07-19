@@ -10,6 +10,7 @@ import com.mygdx.game.com.mygdx.game.AssetsManager.Asset;
 import com.mygdx.game.com.mygdx.game.entities.Player;
 import com.mygdx.game.com.mygdx.game.flyingObjects.Bird;
 import com.mygdx.game.com.mygdx.game.flyingObjects.Bomb;
+import com.mygdx.game.com.mygdx.game.flyingObjects.FlyingTurtle;
 import com.mygdx.game.com.mygdx.game.flyingObjects.Medusa;
 
 import java.util.ArrayList;
@@ -18,21 +19,19 @@ import java.util.ArrayList;
  * Created by pawel_000 on 2016-06-21.
  */
 public class FlyingObjectControler {
-    private static final int MIN_RANGE_SPAWN_TIME = 5;
-    private static final int MAX_RANGE_SPAWN_TIME = 10;
+    private static final int MIN_RANGE_SPAWN_TIME = 3;
+    private static final int MAX_RANGE_SPAWN_TIME = 6;
 
     private static final int START_ENEMY_X_POSITION = 0;
 
-    private ArrayList<FlyingObject> flyingObjectArray;
-    private Asset assets;
+    private static ArrayList<FlyingObject> flyingObjectArray;
+    private static Asset assets;
+    private static boolean randomize = false;
     private Stage stage;
-
-    private boolean randomize = false;
-
     private float spawnTimer = 0;
 
     public FlyingObjectControler(Asset asset, Stage stage) {
-        this.assets = asset;
+        assets = asset;
         this.stage = stage;
 
         flyingObjectArray = new ArrayList<>();
@@ -45,17 +44,10 @@ public class FlyingObjectControler {
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
-
-                Timer.schedule(new Timer.Task() {
-                    @Override
-                    public void run() {
-                        addObjectOnStage();
-                        randomSpawnTime();
-                        init();
-                    }
-                }, spawnTimer);
+                addObjectOnStage();
+                randomSpawnTime();
             }
-        }, 0, 5);
+        }, spawnTimer, spawnTimer);
     }
 
     public void update(Player player) {
@@ -65,15 +57,15 @@ public class FlyingObjectControler {
             checkCollision(player, object);
             object.update();
 
-            if (!object.getDirection() && object.getX() < -object.getWidth())
-                obj = object;
-            else if (object.getDirection() && object.getX() > IcyTower.SCREEN_WIDTH)
+            if ((!object.getDirection() && object.getX() < -object.getWidth()) ||
+                    (object.getDirection() && object.getX() > IcyTower.SCREEN_WIDTH))
                 obj = object;
         }
 
         if (obj != null) {
             obj.animation.addAction(Actions.removeActor());
             flyingObjectArray.remove(obj);
+            obj.remove();
         }
     }
 
@@ -81,20 +73,26 @@ public class FlyingObjectControler {
         if (player.getRectangleBox().overlaps(object.getRectangleBox()) && !player.getDie()) {
             player.setDie(true);
             player.setJump(false);
-            player.setJumpVelocity(300);
+            player.setJumpVelocity(600);
+
+            player.game.getSoundService().pauseTitleSound();
+            player.game.getSoundService().playDeathSound();
         }
     }
 
     private void addObjectOnStage() {
-        if (flyingObjectArray.size() < 2 && !randomize) {
+        if (flyingObjectArray.size() <= 2 && !randomize) {
             FlyingObject object = randomObject();
-            flyingObjectArray.add(object);
-            stage.addActor(object.animation);
+
+            if (object != null) {
+                flyingObjectArray.add(object);
+                stage.addActor(object.animation);
+            }
         }
     }
 
     private FlyingObject randomObject() {
-        int objectType = MathUtils.random(8);
+        int objectType = MathUtils.random(12);
         FlyingObject object = null;
 
         switch (objectType) {
@@ -103,31 +101,47 @@ public class FlyingObjectControler {
                 break;
 
             case 1:
-                object = new Bomb(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/bomb_black.png", Texture.class));
+                object = new FlyingTurtle(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/flying_turtle_green.png", Texture.class));
                 break;
 
             case 2:
-                object = new Bird(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/bird_green.png", Texture.class));
+                object = new Bomb(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/bomb_black.png", Texture.class));
                 break;
 
             case 3:
-                object = new Medusa(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/medusa_blue.png", Texture.class));
+                object = new Bird(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/bird_green.png", Texture.class));
                 break;
 
             case 4:
-                object = new Bomb(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/bomb_blue.png", Texture.class));
+                object = new Medusa(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/medusa_blue.png", Texture.class));
                 break;
 
             case 5:
-                object = new Bird(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/bird_blue.png", Texture.class));
+                object = new FlyingTurtle(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/flying_turtle_dark.png", Texture.class));
                 break;
 
             case 6:
-                object = new Medusa(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/medusa_white.png", Texture.class));
+                object = new Bomb(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/bomb_blue.png", Texture.class));
                 break;
 
             case 7:
+                object = new Bird(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/bird_blue.png", Texture.class));
+                break;
+
+            case 8:
+                object = new Medusa(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/medusa_white.png", Texture.class));
+                break;
+
+            case 9:
+                object = new FlyingTurtle(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/flying_turtle_red.png", Texture.class));
+                break;
+
+            case 10:
                 object = new Bomb(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/bomb_grey.png", Texture.class));
+                break;
+
+            case 11:
+                object = new FlyingTurtle(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/flying_turtle_grey.png", Texture.class));
                 break;
 
             default:
@@ -139,27 +153,15 @@ public class FlyingObjectControler {
     }
 
     public void clearObjects() {
-        for (int i = 0; i < flyingObjectArray.size(); i++) {
-            FlyingObject obj = null;
+        for (int i = 0; i < flyingObjectArray.size(); i++)
+            flyingObjectArray.remove(i);
 
-            for (FlyingObject object : flyingObjectArray) {
-                obj = object;
-
-                break;
-            }
-
-            if (obj != null) {
-                obj.animation.addAction(Actions.removeActor());
-                flyingObjectArray.remove(obj);
-            }
-        }
+        flyingObjectArray = new ArrayList<>();
     }
 
     private float getRandomYPosition() {
-        float position = Math.abs(MathUtils.random(Math.abs(stage.getCamera().position.y - IcyTower.SCREEN_HEIGHT / 4),
+        return Math.abs(MathUtils.random(Math.abs(stage.getCamera().position.y - IcyTower.SCREEN_HEIGHT / 4),
                 stage.getCamera().position.y + IcyTower.SCREEN_HEIGHT * 2));
-
-        return position;
     }
 
     private void randomSpawnTime() {
@@ -167,6 +169,6 @@ public class FlyingObjectControler {
     }
 
     public void setRandomize(boolean randomize) {
-        this.randomize = randomize;
+        FlyingObjectControler.randomize = randomize;
     }
 }

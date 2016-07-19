@@ -88,6 +88,7 @@ public class Bomb extends FlyingObject {
     }
 
     public void update() {
+
         if (!direction) {
             this.moveBy(-SPEED * Gdx.graphics.getDeltaTime(), GRAVITY * Gdx.graphics.getDeltaTime());
             animation.rotateBy((-GRAVITY / SPEED) * 2 * Gdx.graphics.getDeltaTime());

@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.mygdx.game.com.mygdx.game.entities.AnimatedImage;
 import com.mygdx.game.com.mygdx.game.entities.Entity;
 
@@ -19,7 +20,9 @@ public abstract class Enemy extends Entity {
     protected Rectangle left;
     protected Rectangle right;
 
-    protected Enemy(final Texture texture, float x, float y, final int WIDTH, final int HEIGHT) {
+    protected boolean dragon = false;
+
+    protected Enemy(final Texture texture, float x, float y, int WIDTH, int HEIGHT) {
         super(texture, x, y, WIDTH, HEIGHT);
 
         init();
@@ -30,13 +33,17 @@ public abstract class Enemy extends Entity {
         initEnemy();
     }
 
-    private void initEnemy() {
+    public void initEnemy() {
         animation = new AnimatedImage(getAnimation());
 
         top = new Rectangle(getX(), getY(), getWidth(), 5);
         bottom = new Rectangle(getX() + 1, getY() - getHeight() - 1, getWidth() - 2, 5);
         left = new Rectangle(getX(), getY() - 5, 5, getHeight() - 10);
         right = new Rectangle(getX() + getWidth() - 5, getY() - 5, 5, getHeight() - 10);
+    }
+
+    public void removeEnemy() {
+        animation.addAction(Actions.removeActor());
     }
 
     protected abstract void initAnimations();
@@ -73,6 +80,10 @@ public abstract class Enemy extends Entity {
         this.move = move;
     }
 
+    public boolean getDragonInfo() {
+        return dragon;
+    }
+
     //////////// SETTERS
 
     public float getSPEED() {
@@ -82,7 +93,7 @@ public abstract class Enemy extends Entity {
     public void setSPEED(float speed) {
         this.SPEED = speed;
 
-        SPEED += MathUtils.random(-2, 4);
+        SPEED += MathUtils.random(-2, 2);
     }
 
     public enum State {MOVE, DIE}

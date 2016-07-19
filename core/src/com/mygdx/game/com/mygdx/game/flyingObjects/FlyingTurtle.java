@@ -12,28 +12,28 @@ import com.mygdx.game.com.mygdx.game.controllers.FlyingObject;
 import com.mygdx.game.com.mygdx.game.entities.AnimatedImage;
 
 /**
- * Created by pawel_000 on 2016-06-19.
+ * Created by pawel_000 on 2016-07-19.
  */
-public class Bird extends FlyingObject {
-    private static final int WIDTH = 48;
-    private static final int HEIGHT = 48;
+public class FlyingTurtle extends FlyingObject {
+    private static final int WIDTH = 39;
+    private static final int HEIGHT = 59;
 
-    private static final int JUMP_VELOCITY = 400;
-    private static final float MIN_TIME_RANGE = 0.3f;
-    private static final float MAX_TIME_RANGE = 0.8f;
+    private static final int JUMP_VELOCITY = 600;
+    private static final float MIN_TIME_RANGE = 0.4f;
+    private static final float MAX_TIME_RANGE = 0.9f;
 
     private float timer = 0.0f;
     private float time = 0.0f;
     private float jumpVelocity = 0.0f;
 
-    public Bird(float x, float y, final Texture texture) {
+    public FlyingTurtle(float x, float y, final Texture texture) {
         super(texture, x, y, WIDTH, HEIGHT);
 
         init();
     }
 
     private void init() {
-        SPEED = 70 + MathUtils.random(50);
+        SPEED = 50 + MathUtils.random(30);
         box = new Rectangle(getX(), getY(), WIDTH, HEIGHT);
 
         initAnimations();
@@ -57,7 +57,7 @@ public class Bird extends FlyingObject {
             frames.add(region);
         }
 
-        animation = new AnimatedImage(new Animation(0.1f, frames));
+        animation = new AnimatedImage(new Animation(0.05f, frames));
         frames.clear();
     }
 
@@ -69,7 +69,7 @@ public class Bird extends FlyingObject {
         for (int i = 0; i < 2; i++)
             frames.add(new TextureRegion(texture, i * WIDTH, 0, WIDTH, HEIGHT));
 
-        animation = new AnimatedImage(new Animation(0.1f, frames));
+        animation = new AnimatedImage(new Animation(0.05f, frames));
         frames.clear();
     }
 

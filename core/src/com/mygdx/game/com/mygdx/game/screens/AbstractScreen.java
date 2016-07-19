@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.mygdx.game.IcyTower;
-import com.mygdx.game.com.mygdx.game.AssetsManager.Asset;
 
 /**
  * Created by pawel_000 on 2016-05-24.
@@ -17,9 +16,8 @@ public abstract class AbstractScreen implements Screen{
     public OrthographicCamera camera;
     public OrthographicCamera cameraScore;
     public SpriteBatch batch;
-    protected IcyTower game;
+    public IcyTower game;
     protected Stage stage;
-    protected Asset assets;
 
     public AbstractScreen(IcyTower game){
         this.game = game;

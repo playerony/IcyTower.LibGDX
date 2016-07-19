@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.IcyTower;
 
 /**
  * Created by pawel_000 on 2016-05-24.
@@ -18,41 +19,36 @@ public class Player extends Entity {
 
     private static final float START_X = 25.0f;
     private static final float START_Y = 36.5f;
-
+    public IcyTower game;
     private float angle = 0.0f;
     private float jumpVelocity;
     private float runVelocity;
-
     private boolean collision = false;
     private boolean rotate = false;
     private boolean floor = false;
     private boolean flip = false;
     private boolean die = false;
     private boolean jump = true;
-
     private State currentState;
     private Direction direction;
-
     private Animation playerRunRight;
     private Animation playerJumpRight;
     private Animation playerStandingRight;
     private Animation playerFlipRight;
-
     private Animation playerRunLeft;
     private Animation playerJumpLeft;
     private Animation playerStandingLeft;
     private Animation playerFlipLeft;
-
     private Animation playerDie;
-
     private Rectangle box;
     private Rectangle bottom;
     private Rectangle top;
     private Rectangle left;
     private Rectangle right;
 
-    public Player(final Texture texture) {
+    public Player(final Texture texture, final IcyTower game) {
         super(texture, START_X, START_Y, WIDTH, HEIGHT);
+        this.game = game;
 
         init();
     }
@@ -281,9 +277,10 @@ public class Player extends Entity {
             runVelocity = 0;
 
 
-        if (Gdx.input.isKeyPressed(Input.Keys.SPACE) && !die) {
+        if (Gdx.input.isKeyPressed(Input.Keys.SPACE) && !die && jump) {
             runVelocity = 0;
             jump();
+            game.getSoundService().playJumpSound();
         }
     }
 

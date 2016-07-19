@@ -15,10 +15,10 @@ import com.mygdx.game.com.mygdx.game.entities.AnimatedImage;
  * Created by pawel_000 on 2016-06-19.
  */
 public class Medusa extends FlyingObject {
-    private static final int WIDTH = 38;
-    private static final int HEIGHT = 56;
+    private static final int WIDTH = 41;
+    private static final int HEIGHT = 60;
 
-    private static int MULTIPLER = 1;
+    private static float MULTIPLER = 1.0f;
     private static float timer = 0.0f;
 
     private boolean jump = false;
@@ -37,34 +37,14 @@ public class Medusa extends FlyingObject {
     }
 
     protected void initAnimations() {
-        if (direction)
-            initRightAnimation();
-        else
-            initLeftAnimation();
-    }
-
-    private void initRightAnimation() {
         Array<TextureRegion> frames = new Array<TextureRegion>();
 
         ///////////////////////////
 
         for (int i = 0; i < 2; i++) {
             TextureRegion region = new TextureRegion(texture, i * WIDTH, 0, WIDTH, HEIGHT);
-            region.flip(true, false);
             frames.add(region);
         }
-
-        animation = new AnimatedImage(new Animation(0.2f, frames));
-        frames.clear();
-    }
-
-    private void initLeftAnimation() {
-        Array<TextureRegion> frames = new Array<TextureRegion>();
-
-        ///////////////////////////
-
-        for (int i = 0; i < 2; i++)
-            frames.add(new TextureRegion(texture, i * WIDTH, 0, WIDTH, HEIGHT));
 
         animation = new AnimatedImage(new Animation(0.2f, frames));
         frames.clear();
@@ -99,7 +79,8 @@ public class Medusa extends FlyingObject {
             this.moveBy(SPEED * MULTIPLER * Gdx.graphics.getDeltaTime(), 0);
 
         if (jump) {
-            MULTIPLER = 2;
+            if (MULTIPLER == 1)
+                MULTIPLER = MathUtils.random(-1.1f, 2.5f);
 
             this.moveBy(0, -GRAVITY * MULTIPLER * 3 * Gdx.graphics.getDeltaTime());
         } else

@@ -21,13 +21,16 @@ public class Platform extends Image {
     private static float posX = 0;
     private static float posY = 0;
     private boolean points = true;
+
     private Rectangle bounds;
     private Array<Block> blocks;
+
     private Texture brickTexture;
     private Texture blueBrickTexture;
     private Texture greyBrickTexture;
     private Texture greenBrickTexture;
     private Texture questionMarkTexture;
+
     public Platform(float x, float y, int size, Asset assets) {
         SIZE = size;
 
@@ -35,7 +38,7 @@ public class Platform extends Image {
         this.setHeight(HEIGHT);
         this.setPosition(x, y);
 
-        bounds = new Rectangle((int)getX(), (int)getY(), (int)getWidth(), (int)getHeight());
+        bounds = new Rectangle(getX(), getY(), getWidth(), getHeight());
 
         initTextures(assets);
         init();
@@ -58,7 +61,7 @@ public class Platform extends Image {
 
         for(int i=0 ; i<SIZE ; i++){
             lastValue = value;
-            value = MathUtils.random(10);
+            value = MathUtils.random(7);
             Block b = null;
 
             if (value == 3 && i > 0 && i < SIZE - 1 && value != lastValue)
@@ -69,11 +72,15 @@ public class Platform extends Image {
 
             blocks.add(b);
         }
+
+        bricks = Bricks.RED;
     }
 
     public void removeBlocks() {
-        for (Block b : blocks)
+        for (Block b : blocks) {
+            b.remove();
             b.addAction(Actions.removeActor());
+        }
 
         blocks.clear();
     }
@@ -160,7 +167,6 @@ public class Platform extends Image {
     }
 
     public void setBricks(final int value) {
-
         if (value == 0) {
             bricks = Bricks.RED;
         } else if (value == 1) {
