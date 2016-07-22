@@ -39,6 +39,7 @@ public class Dragon extends Enemy {
     public void initEnemy() {
         animation = new AnimatedImage(getAnimation());
 
+        box = new Rectangle(getX(), getY(), WIDTH, HEIGHT);
         top = new Rectangle(getX() + 1, getY(), WIDTH - 2, 10);
         bottom = new Rectangle(getX() + 1, getY() - 137 - 10, WIDTH - 2, 10);
         left = new Rectangle(getX(), getY() - 5, 10, 137 - 10);
@@ -129,6 +130,7 @@ public class Dragon extends Enemy {
         if (move) {
             this.moveBy(SPEED * Gdx.graphics.getDeltaTime(), 0);
 
+            box.setPosition(getX(), getY());
             top.setPosition(getX(), getY());
             bottom.setPosition(getX() + 1, getY() - getHeight() + 1);
             left.setPosition(getX(), getY() - 5);

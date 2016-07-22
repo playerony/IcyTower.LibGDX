@@ -15,12 +15,14 @@ public abstract class Enemy extends Entity {
     protected boolean move = true;
     protected float SPEED = 10;
 
+    protected Rectangle box;
     protected Rectangle top;
     protected Rectangle bottom;
     protected Rectangle left;
     protected Rectangle right;
 
     protected boolean dragon = false;
+    protected boolean non_invasive = true;
 
     protected Enemy(final Texture texture, float x, float y, int WIDTH, int HEIGHT) {
         super(texture, x, y, WIDTH, HEIGHT);
@@ -36,6 +38,7 @@ public abstract class Enemy extends Entity {
     public void initEnemy() {
         animation = new AnimatedImage(getAnimation());
 
+        box = new Rectangle(getX(), getY(), getWidth(), getHeight());
         top = new Rectangle(getX(), getY(), getWidth(), 5);
         bottom = new Rectangle(getX() + 1, getY() - getHeight() - 1, getWidth() - 2, 5);
         left = new Rectangle(getX(), getY() - 5, 5, getHeight() - 10);
@@ -72,6 +75,10 @@ public abstract class Enemy extends Entity {
         return right;
     }
 
+    public Rectangle getBound() {
+        return box;
+    }
+
     public boolean getMove() {
         return move;
     }
@@ -82,6 +89,10 @@ public abstract class Enemy extends Entity {
 
     public boolean getDragonInfo() {
         return dragon;
+    }
+
+    public boolean isInvasive() {
+        return non_invasive;
     }
 
     //////////// SETTERS

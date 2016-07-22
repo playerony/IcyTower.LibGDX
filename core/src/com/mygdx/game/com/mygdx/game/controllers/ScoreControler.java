@@ -24,17 +24,21 @@ public class ScoreControler {
 
     private void addScore() {
         if (SCORE_TO_ADD > 0) {
-            if (SCORE_TO_ADD < 100) {
+            if (SCORE_TO_ADD < 10) {
                 SCORE += 1;
                 SCORE_TO_ADD -= 1;
-
-            } else if (SCORE_TO_ADD <= 1000 && SCORE_TO_ADD >= 100) {
+            } else if (SCORE_TO_ADD < 100 && SCORE_TO_ADD >= 10) {
                 SCORE += 10;
                 SCORE_TO_ADD -= 10;
-
-            } else if (SCORE_TO_ADD > 1000) {
+            } else if (SCORE_TO_ADD < 1000 && SCORE_TO_ADD >= 100) {
                 SCORE += 100;
                 SCORE_TO_ADD -= 100;
+            } else if (SCORE_TO_ADD <= 10000 && SCORE_TO_ADD >= 1000) {
+                SCORE += 1000;
+                SCORE_TO_ADD -= 1000;
+            } else if (SCORE_TO_ADD > 10000) {
+                SCORE += 10000;
+                SCORE_TO_ADD -= 10000;
             }
         }
     }

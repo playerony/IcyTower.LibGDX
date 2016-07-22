@@ -8,10 +8,7 @@ import com.badlogic.gdx.utils.Timer;
 import com.mygdx.game.IcyTower;
 import com.mygdx.game.com.mygdx.game.AssetsManager.Asset;
 import com.mygdx.game.com.mygdx.game.entities.Player;
-import com.mygdx.game.com.mygdx.game.flyingObjects.Bird;
-import com.mygdx.game.com.mygdx.game.flyingObjects.Bomb;
-import com.mygdx.game.com.mygdx.game.flyingObjects.FlyingTurtle;
-import com.mygdx.game.com.mygdx.game.flyingObjects.Medusa;
+import com.mygdx.game.com.mygdx.game.flyingObjects.*;
 
 import java.util.ArrayList;
 
@@ -19,7 +16,7 @@ import java.util.ArrayList;
  * Created by pawel_000 on 2016-06-21.
  */
 public class FlyingObjectControler {
-    private static final int MIN_RANGE_SPAWN_TIME = 3;
+    private static final int MIN_RANGE_SPAWN_TIME = 4;
     private static final int MAX_RANGE_SPAWN_TIME = 6;
 
     private static final int START_ENEMY_X_POSITION = 0;
@@ -81,7 +78,7 @@ public class FlyingObjectControler {
     }
 
     private void addObjectOnStage() {
-        if (flyingObjectArray.size() <= 2 && !randomize) {
+        if (flyingObjectArray.size() < 2 && !randomize) {
             FlyingObject object = randomObject();
 
             if (object != null) {
@@ -92,7 +89,7 @@ public class FlyingObjectControler {
     }
 
     private FlyingObject randomObject() {
-        int objectType = MathUtils.random(12);
+        int objectType = MathUtils.random(15);
         FlyingObject object = null;
 
         switch (objectType) {
@@ -105,42 +102,54 @@ public class FlyingObjectControler {
                 break;
 
             case 2:
-                object = new Bomb(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/bomb_black.png", Texture.class));
+                object = new FlyingCloud(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/cloud_green.png", Texture.class));
                 break;
 
             case 3:
-                object = new Bird(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/bird_green.png", Texture.class));
+                object = new Bomb(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/bomb_black.png", Texture.class));
                 break;
 
             case 4:
-                object = new Medusa(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/medusa_blue.png", Texture.class));
+                object = new Bird(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/bird_green.png", Texture.class));
                 break;
 
             case 5:
-                object = new FlyingTurtle(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/flying_turtle_dark.png", Texture.class));
+                object = new Medusa(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/medusa_blue.png", Texture.class));
                 break;
 
             case 6:
-                object = new Bomb(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/bomb_blue.png", Texture.class));
+                object = new FlyingTurtle(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/flying_turtle_dark.png", Texture.class));
                 break;
 
             case 7:
-                object = new Bird(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/bird_blue.png", Texture.class));
+                object = new FlyingCloud(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/cloud_blue.png", Texture.class));
                 break;
 
             case 8:
-                object = new Medusa(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/medusa_white.png", Texture.class));
+                object = new Bomb(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/bomb_blue.png", Texture.class));
                 break;
 
             case 9:
-                object = new FlyingTurtle(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/flying_turtle_red.png", Texture.class));
+                object = new Bird(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/bird_blue.png", Texture.class));
                 break;
 
             case 10:
-                object = new Bomb(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/bomb_grey.png", Texture.class));
+                object = new Medusa(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/medusa_white.png", Texture.class));
                 break;
 
             case 11:
+                object = new FlyingTurtle(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/flying_turtle_red.png", Texture.class));
+                break;
+
+            case 12:
+                object = new FlyingCloud(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/cloud_white.png", Texture.class));
+                break;
+
+            case 13:
+                object = new Bomb(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/bomb_grey.png", Texture.class));
+                break;
+
+            case 14:
                 object = new FlyingTurtle(START_ENEMY_X_POSITION, getRandomYPosition(), assets.manager.get("assets/flying_turtle_grey.png", Texture.class));
                 break;
 

@@ -16,21 +16,26 @@ public class Player extends Entity {
     private static final int WIDTH = 64;
     private static final int HEIGHT = 64;
     private static final int JUMP_VELOCITY = 800;
-
     private static final float START_X = 25.0f;
     private static final float START_Y = 36.5f;
+    private static int PIPE_JUMP_VELOCITY = 1000;
     public IcyTower game;
     private float angle = 0.0f;
     private float jumpVelocity;
     private float runVelocity;
+
     private boolean collision = false;
     private boolean rotate = false;
     private boolean floor = false;
     private boolean flip = false;
     private boolean die = false;
     private boolean jump = true;
+
+    private boolean onPipe = false;
+
     private State currentState;
     private Direction direction;
+
     private Animation playerRunRight;
     private Animation playerJumpRight;
     private Animation playerStandingRight;
@@ -40,6 +45,7 @@ public class Player extends Entity {
     private Animation playerStandingLeft;
     private Animation playerFlipLeft;
     private Animation playerDie;
+
     private Rectangle box;
     private Rectangle bottom;
     private Rectangle top;
@@ -60,11 +66,11 @@ public class Player extends Entity {
         initRightSideAnimations();
         initLeftSideAnimations();
 
-        box = new Rectangle(getX(), getY(), WIDTH, HEIGHT);
-        top = new Rectangle(getX() + 5, getY(), WIDTH - 10, 5);
-        bottom = new Rectangle(getX() + 1, getY() - HEIGHT + 10, WIDTH - 2, 10);
-        left = new Rectangle(getX(), getY() - 5, 5, getHeight() - 10);
-        right = new Rectangle(getX() + WIDTH - 5, getY() - 5, 5, HEIGHT - 10);
+        box = new Rectangle(getX() + 3, getY(), WIDTH - 6, HEIGHT);
+        top = new Rectangle(getX() + 5, getY(), WIDTH - 10, 10);
+        bottom = new Rectangle(getX() + 5, getY() - HEIGHT + 10, WIDTH - 10, 10);
+        left = new Rectangle(getX() + 3, getY() - 5, 10, getHeight() - 10);
+        right = new Rectangle(getX() + WIDTH - 8, getY() - 5, 5, HEIGHT - 10);
     }
 
     private void initLeftSideAnimations() {
@@ -169,11 +175,11 @@ public class Player extends Entity {
             floor = true;
         }
 
-        box.setPosition(getX(), getY());
-        bottom.setPosition(getX() + 1, getY() - HEIGHT + 5);
+        box.setPosition(getX() + 3, getY());
         top.setPosition(getX() + 5, getY());
-        left.setPosition(getX(), getY() - 5);
-        right.setPosition(getX() + WIDTH - 5, getY() - 5);
+        bottom.setPosition(getX() + 5, getY() - HEIGHT + 10);
+        left.setPosition(getX() + 3, getY() - 5);
+        right.setPosition(getX() + WIDTH - 8, getY() - 5);
     }
 
     public Animation getAnimation(){
@@ -286,7 +292,10 @@ public class Player extends Entity {
 
     private void jump() {
         if(jump && jumpVelocity >= -100){
-            jumpVelocity += JUMP_VELOCITY;
+            if (!onPipe)
+                jumpVelocity += JUMP_VELOCITY;
+            else
+                jumpVelocity += PIPE_JUMP_VELOCITY;
             jump = false;
         }
     }
@@ -337,7 +346,15 @@ public class Player extends Entity {
         this.die = die;
     }
 
+    public boolean getOnPipe() {
+        return onPipe;
+    }
+
     //////////// SETTERS
+
+    public void setOnPipe(boolean onPipe) {
+        this.onPipe = onPipe;
+    }
 
     public Rectangle getTopBound() {
         return top;

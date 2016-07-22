@@ -11,9 +11,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.mygdx.game.IcyTower;
+import com.mygdx.game.com.mygdx.game.controllers.ScoreControler;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.Scanner;
 
 /**
@@ -114,6 +116,15 @@ public class MenuScreen {
         }
 
         return in.nextInt();
+    }
+
+    public void saveNewRecord(ScoreControler scoreControler) throws FileNotFoundException {
+        if (scoreControler.getSCORE() > BEST_SCORE) {
+            PrintWriter zapis = new PrintWriter("assets/bestScore.txt");
+            zapis.println(scoreControler.getSCORE());
+
+            zapis.close();
+        }
     }
 
     public String getPoints(int value) {

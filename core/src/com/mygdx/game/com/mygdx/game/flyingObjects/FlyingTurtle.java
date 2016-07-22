@@ -18,9 +18,9 @@ public class FlyingTurtle extends FlyingObject {
     private static final int WIDTH = 39;
     private static final int HEIGHT = 59;
 
-    private static final int JUMP_VELOCITY = 600;
-    private static final float MIN_TIME_RANGE = 0.4f;
-    private static final float MAX_TIME_RANGE = 0.9f;
+    private static final int JUMP_VELOCITY = 700;
+    private static final float MIN_TIME_RANGE = 0.5f;
+    private static final float MAX_TIME_RANGE = 1.5f;
 
     private float timer = 0.0f;
     private float time = 0.0f;
@@ -33,7 +33,7 @@ public class FlyingTurtle extends FlyingObject {
     }
 
     private void init() {
-        SPEED = 50 + MathUtils.random(30);
+        SPEED = 100 + MathUtils.random(50);
         box = new Rectangle(getX(), getY(), WIDTH, HEIGHT);
 
         initAnimations();
@@ -57,7 +57,7 @@ public class FlyingTurtle extends FlyingObject {
             frames.add(region);
         }
 
-        animation = new AnimatedImage(new Animation(0.05f, frames));
+        animation = new AnimatedImage(new Animation(0.2f, frames));
         frames.clear();
     }
 
@@ -69,7 +69,7 @@ public class FlyingTurtle extends FlyingObject {
         for (int i = 0; i < 2; i++)
             frames.add(new TextureRegion(texture, i * WIDTH, 0, WIDTH, HEIGHT));
 
-        animation = new AnimatedImage(new Animation(0.05f, frames));
+        animation = new AnimatedImage(new Animation(0.2f, frames));
         frames.clear();
     }
 

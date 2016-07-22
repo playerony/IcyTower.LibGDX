@@ -4,10 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.com.mygdx.game.controllers.Enemy;
-import com.mygdx.game.com.mygdx.game.entities.AnimatedImage;
 
 /**
  * Created by pawel_000 on 2016-07-19.
@@ -25,23 +23,13 @@ public class BigTurtle extends Enemy {
     public BigTurtle(float x, float y, final Texture texture) {
         super(texture, x, y, WIDTH, HEIGHT);
 
-        dragon = true;
-        SPEED = 20;
+        SPEED = 10;
     }
 
     protected void initAnimations() {
         initLeftSideAnimation();
         initRightSideAnimation();
         initDieAnimation();
-    }
-
-    public void initEnemy() {
-        animation = new AnimatedImage(getAnimation());
-
-        top = new Rectangle(getX() + 1, getY(), WIDTH - 2, 10);
-        bottom = new Rectangle(getX() + 1, getY() - 137 - 10, WIDTH - 2, 10);
-        left = new Rectangle(getX(), getY() - 5, 10, 137 - 10);
-        right = new Rectangle(getX() + WIDTH - 10, getY() - 5, 10, 137 - 10);
     }
 
     private void initDieAnimation() {
@@ -128,6 +116,7 @@ public class BigTurtle extends Enemy {
         if (move) {
             this.moveBy(SPEED * Gdx.graphics.getDeltaTime(), 0);
 
+            box.setPosition(getX(), getY());
             top.setPosition(getX(), getY());
             bottom.setPosition(getX() + 1, getY() - getHeight() + 1);
             left.setPosition(getX(), getY() - 5);

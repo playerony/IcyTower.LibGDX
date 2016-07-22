@@ -33,7 +33,7 @@ public class Bird extends FlyingObject {
     }
 
     private void init() {
-        SPEED = 70 + MathUtils.random(50);
+        SPEED = 50 + MathUtils.random(30);
         box = new Rectangle(getX(), getY(), WIDTH, HEIGHT);
 
         initAnimations();

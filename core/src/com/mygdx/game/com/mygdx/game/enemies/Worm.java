@@ -80,6 +80,7 @@ public class Worm extends Enemy {
         if (move) {
             this.moveBy(SPEED * Gdx.graphics.getDeltaTime(), 0);
 
+            box.setPosition(getX(), getY());
             top.setPosition(getX(), getY());
             bottom.setPosition(getX() + 1, getY() - getHeight() + 1);
             left.setPosition(getX(), getY() - 5);

@@ -23,6 +23,7 @@ public class Hedgehog extends Enemy {
     public Hedgehog(float x, float y, final Texture texture) {
         super(texture, x, y, WIDTH, HEIGHT);
 
+        non_invasive = false;
     }
 
     protected void initAnimations() {
@@ -115,6 +116,7 @@ public class Hedgehog extends Enemy {
         if (move) {
             this.moveBy(SPEED * Gdx.graphics.getDeltaTime(), 0);
 
+            box.setPosition(getX(), getY());
             top.setPosition(getX(), getY());
             bottom.setPosition(getX() + 1, getY() - getHeight() + 1);
             left.setPosition(getX(), getY() - 5);
