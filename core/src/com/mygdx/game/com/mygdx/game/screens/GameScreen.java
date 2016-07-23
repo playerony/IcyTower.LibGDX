@@ -255,8 +255,11 @@ public class GameScreen extends AbstractScreen {
             camera.position.set(IcyTower.SCREEN_WIDTH / 2, player.getY() + 200 + player.getJumpVelocity() / 100 + cameraVelocity, 0);
 
 
-        if (player.getJumpVelocity() <= 0)
+        if (player.getJumpVelocity() == 0)
             cameraVelocity += (CAMERA_MOVEMENT_SPEED * Gdx.graphics.getDeltaTime());
+
+        else if (player.getJumpVelocity() < 0)
+            cameraVelocity += (CAMERA_MOVEMENT_SPEED * 3 * Gdx.graphics.getDeltaTime());
 
         else if (player.getJumpVelocity() > 0 && cameraVelocity > 0)
             cameraVelocity -= (CAMERA_MOVEMENT_SPEED * 2 * Gdx.graphics.getDeltaTime());

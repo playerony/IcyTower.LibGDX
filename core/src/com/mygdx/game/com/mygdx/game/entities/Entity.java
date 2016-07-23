@@ -15,10 +15,10 @@ public abstract class Entity extends Image {
     public Entity(final Texture texture, float x, float y, final int WIDTH, final int HEIGHT) {
         super(texture);
 
-        setTexture(texture);
         this.setPosition(x, y);
         this.setSize(WIDTH, HEIGHT);
         this.setOrigin(WIDTH / 2, HEIGHT / 2);
+        setTexture(texture);
     }
 
     protected void setTexture(final Texture texture) {

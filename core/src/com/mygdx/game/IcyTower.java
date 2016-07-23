@@ -6,7 +6,6 @@ import com.mygdx.game.com.mygdx.game.screens.SplashScreen;
 import com.mygdx.game.com.mygdx.game.service.SoundService;
 
 public class IcyTower extends Game {
-
 	public static final String GAME_NAME = "Icy Mario";
 
 	public static final int SCREEN_WIDTH = 480;

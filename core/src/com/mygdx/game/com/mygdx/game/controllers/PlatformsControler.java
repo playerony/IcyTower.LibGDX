@@ -76,7 +76,7 @@ public class PlatformsControler {
                 player.setOnPipe(false);
 
                 if (scoreControler.isAddPoints() && p.isPoints()) {
-                    scoreControler.increaseScoreToAdd(EnemyControler.getAmoutOfEnemies() * LEVEL_PLATFORMS * 2);
+                    scoreControler.increaseScoreToAdd(EnemyControler.getAmoutOfEnemies() * LEVEL_PLATFORMS);
                     scoreControler.setAddPoints(false);
 
                     p.setPoints(false);

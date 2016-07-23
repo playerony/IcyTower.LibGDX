@@ -13,9 +13,8 @@ import com.mygdx.game.com.mygdx.game.entities.AnimatedImage;
  * Created by pawel_000 on 2016-07-15.
  */
 public class Dragon extends Enemy {
-    private static final int WIDTH = 107;
-    private static final int HEIGHT = 65;
-    private static final int DRAGON_HEIGHT = 107;
+    private static final int WIDTH = 95;
+    private static final int HEIGHT = 95;
 
     private boolean hide = false;
 
@@ -24,7 +23,7 @@ public class Dragon extends Enemy {
     private Animation enemyDie;
 
     public Dragon(float x, float y, final Texture texture) {
-        super(texture, x, y, WIDTH, HEIGHT);
+        super(texture, x, y, WIDTH, HEIGHT - 30);
 
         dragon = true;
         SPEED = 20;
@@ -39,17 +38,17 @@ public class Dragon extends Enemy {
     public void initEnemy() {
         animation = new AnimatedImage(getAnimation());
 
-        box = new Rectangle(getX(), getY(), WIDTH, HEIGHT);
-        top = new Rectangle(getX() + 1, getY(), WIDTH - 2, 10);
-        bottom = new Rectangle(getX() + 1, getY() - 137 - 10, WIDTH - 2, 10);
-        left = new Rectangle(getX(), getY() - 5, 10, 137 - 10);
-        right = new Rectangle(getX() + WIDTH - 10, getY() - 5, 10, 137 - 10);
+        box = new Rectangle(getX(), getY(), getWidth(), 150);
+        top = new Rectangle(getX(), getY() + 64, getWidth(), 40);
+        bottom = new Rectangle(getX() + 1, getY() - HEIGHT - 1, getWidth() - 2, 5);
+        left = new Rectangle(getX(), getY() - 5, 5, HEIGHT);
+        right = new Rectangle(getX() + getWidth() - 5, getY() - 5, 5, HEIGHT);
     }
 
     private void initDieAnimation() {
         Array<TextureRegion> frames = new Array<TextureRegion>();
 
-        TextureRegion region = new TextureRegion(texture, 3 * WIDTH, 0, WIDTH, DRAGON_HEIGHT);
+        TextureRegion region = new TextureRegion(texture, (3 * WIDTH) + 1, 0, WIDTH + 1, HEIGHT);
         frames.add(region);
 
         enemyDie = new Animation(0.1f, frames);
@@ -58,9 +57,16 @@ public class Dragon extends Enemy {
 
     private void initRightSideAnimation() {
         Array<TextureRegion> frames = new Array<TextureRegion>();
+        TextureRegion region = null;
 
         for (int i = 0; i < 3; i++) {
-            TextureRegion region = new TextureRegion(texture, i * WIDTH, 0, WIDTH, DRAGON_HEIGHT);
+            if (i == 1)
+                region = new TextureRegion(texture, i * WIDTH, 0, WIDTH + 1, HEIGHT);
+            else if (i == 0)
+                region = new TextureRegion(texture, i * WIDTH, 0, WIDTH, HEIGHT);
+            else
+                region = new TextureRegion(texture, (i * WIDTH) + 1, 0, WIDTH, HEIGHT);
+
             region.flip(true, false);
             frames.add(region);
         }
@@ -71,9 +77,16 @@ public class Dragon extends Enemy {
 
     private void initLeftSideAnimation() {
         Array<TextureRegion> frames = new Array<TextureRegion>();
+        TextureRegion region = null;
 
         for (int i = 0; i < 3; i++) {
-            TextureRegion region = new TextureRegion(texture, i * WIDTH, 0, WIDTH, DRAGON_HEIGHT);
+            if (i == 1)
+                region = new TextureRegion(texture, i * WIDTH, 0, WIDTH + 1, HEIGHT);
+            else if (i == 0)
+                region = new TextureRegion(texture, i * WIDTH, 0, WIDTH, HEIGHT);
+            else
+                region = new TextureRegion(texture, (i * WIDTH) + 1, 0, WIDTH, HEIGHT);
+
             frames.add(region);
         }
 

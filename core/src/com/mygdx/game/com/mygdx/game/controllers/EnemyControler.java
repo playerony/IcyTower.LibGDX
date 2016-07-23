@@ -245,10 +245,11 @@ public class EnemyControler {
 
     private void enemyDie() {
         if (enemyToRemoveArray != null) {
-            Enemy ene = null;
             enemyTimer += Gdx.graphics.getDeltaTime();
 
-            if (enemyTimer > 1.0f) {
+            if (enemyTimer > 5.0f) {
+                Enemy ene = null;
+
                 for (Enemy e : enemyToRemoveArray) {
                     ene = e;
                     break;
@@ -256,8 +257,8 @@ public class EnemyControler {
 
                 if (ene != null) {
                     ene.animation.addAction(Actions.removeActor());
-                    enemyArray.remove(ene);
                     ene.remove();
+                    enemyToRemoveArray.remove(ene);
                 }
 
                 enemyTimer = 0;
