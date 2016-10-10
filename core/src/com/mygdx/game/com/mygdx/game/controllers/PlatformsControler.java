@@ -66,14 +66,14 @@ public class PlatformsControler {
         }
     }
 
-    public void platformUpdate(Player player, ScoreControler scoreControler, AnimatedImage anim, MenuScreen menuScreen) {
+    public void platformUpdate(PlayerControler playerControler, ScoreControler scoreControler, AnimatedImage anim, MenuScreen menuScreen) {
         for (Platform p : platformArray) {
-            if (isPlayerOnPlatform(player, p) && !player.getDie()) {
-                player.setJump(true);
-                player.setJumpVelocity(0);
-                player.setY(p.getY() + p.getHeight() - 4);
-                player.setCollision(true);
-                player.setOnPipe(false);
+            if (isPlayerOnPlatform(playerControler.getPlayer(), p) && !playerControler.getPlayer().getDie()) {
+                playerControler.getPlayer().setJump(true);
+                playerControler.getPlayer().setJumpVelocity(0);
+                playerControler.getPlayer().setY(p.getY() + p.getHeight() - 4);
+                playerControler.getPlayer().setCollision(true);
+                playerControler.getPlayer().setOnPipe(false);
 
                 if (scoreControler.isAddPoints() && p.isPoints()) {
                     scoreControler.increaseScoreToAdd(EnemyControler.getAmoutOfEnemies() * LEVEL_PLATFORMS);
@@ -83,7 +83,7 @@ public class PlatformsControler {
                 }
             }
 
-            if (player.getY() - IcyTower.SCREEN_HEIGHT * 1.2f > p.getY()) {
+            if (playerControler.getPlayer().getY() - IcyTower.SCREEN_HEIGHT * 1.2f > p.getY()) {
                 int length = 0;
                 int value = 0;
                 boolean pipe = false;
@@ -126,7 +126,7 @@ public class PlatformsControler {
                     p.setPoints(true);
                 }
 
-                anim.toFront();
+                playerControler.getAnim().toFront();
 
                 if (pipe)
                     LEVEL_PLATFORMS += 2;
@@ -143,12 +143,14 @@ public class PlatformsControler {
                     enemyControler.addDragonOnStage(p, stage, LEVEL_PLATFORMS, NUMBER_OF_BLOCK);
             }
 
-            enemyControler.enemyUpdate(p, player, scoreControler, menuScreen, LEVEL_PLATFORMS);
+            enemyControler.enemyUpdate(p, playerControler.getPlayer(), scoreControler, menuScreen, LEVEL_PLATFORMS);
         }
     }
 
-    public void pipeUpdate(Player player, ScoreControler scoreControler) {
+    public void pipeUpdate(PlayerControler playerControler, ScoreControler scoreControler) {
         Pipe pipe = null;
+
+        Player player = playerControler.getPlayer();
 
         for (Pipe p : pipeArray) {
             if (isPlayerOnPipe(player, p) && !player.getDie()) {

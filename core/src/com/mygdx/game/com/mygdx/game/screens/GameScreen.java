@@ -11,14 +11,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.mygdx.game.IcyTower;
-import com.mygdx.game.com.mygdx.game.controllers.CloudsControler;
-import com.mygdx.game.com.mygdx.game.controllers.FlyingObjectControler;
-import com.mygdx.game.com.mygdx.game.controllers.PlatformAndEnemyControler;
-import com.mygdx.game.com.mygdx.game.controllers.ScoreControler;
+import com.mygdx.game.com.mygdx.game.controllers.*;
 import com.mygdx.game.com.mygdx.game.entities.AnimatedImage;
 import com.mygdx.game.com.mygdx.game.entities.Background;
 import com.mygdx.game.com.mygdx.game.entities.Floor;
-import com.mygdx.game.com.mygdx.game.entities.Player;
 import com.mygdx.game.com.mygdx.game.service.SoundService;
 
 import java.io.FileNotFoundException;
@@ -48,7 +44,7 @@ public class GameScreen extends AbstractScreen {
     private TextButton pauseButton;
 
     private Floor floor;
-    private Player player;
+    private PlayerControler playerControler;
     private MenuScreen menuScreen;
     private CloudsControler cloudsControler;
     private ScoreControler scoreControler;
@@ -113,17 +109,10 @@ public class GameScreen extends AbstractScreen {
     }
 
     private void initPlayer() {
-        player = new Player(game.assets.manager.get("assets/mario.png", Texture.class), game);
+        playerControler = new PlayerControler(game, anim, camera);
 
-        camera.position.set(player.getX() + player.getWidth() / 2, player.getY() + 250, 0);
         cameraScore.position.set(camera.position.x + 70, camera.position.y, 0);
-
-        anim = new AnimatedImage(player.getAnimation());
-        anim.setPosition(player.getX(), player.getY());
-        anim.setAnimation(player.getAnimation());
-        anim.setOrigin(player.getWidth() / 2, player.getHeight() / 2);
-
-        stage.addActor(anim);
+        stage.addActor(playerControler.getAnim());
     }
 
     private void initMenuScreen() {
@@ -233,46 +222,46 @@ public class GameScreen extends AbstractScreen {
         backgroundUpdate();
         playerUpdate();
         cloudsControler.update(camera);
-        platformAndEnemyControler.update(player, scoreControler, anim, menuScreen);
+        platformAndEnemyControler.update(playerControler, scoreControler, anim, menuScreen);
 
         scoreControler.update();
-        flyingObjectControler.update(player);
+        flyingObjectControler.update(playerControler.getPlayer());
     }
 
     private void backgroundUpdate() {
-        background.update(player.getX() / 300, player.getWidth() / 2 + player.getY() / 30);
+        background.update(playerControler.getPlayer().getX() / 300, playerControler.getPlayer().getWidth() / 2 + playerControler.getPlayer().getY() / 30);
 
-        if(player.getX() > IcyTower.SCREEN_WIDTH)
-            player.setX( -player.getWidth() );
+        if (playerControler.getPlayer().getX() > IcyTower.SCREEN_WIDTH)
+            playerControler.getPlayer().setX(-playerControler.getPlayer().getWidth());
 
-        if(player.getX() < -player.getWidth())
-            player.setX( IcyTower.SCREEN_WIDTH );
+        if (playerControler.getPlayer().getX() < -playerControler.getPlayer().getWidth())
+            playerControler.getPlayer().setX(IcyTower.SCREEN_WIDTH);
 
-        anim.setPosition(player.getX(), player.getY());
-        anim.setAnimation(player.getAnimation());
+        playerControler.getAnim().setPosition(playerControler.getPlayer().getX(), playerControler.getPlayer().getY());
+        playerControler.getAnim().setAnimation(playerControler.getPlayer().getAnimation());
 
-        if (!player.getDie())
-            camera.position.set(IcyTower.SCREEN_WIDTH / 2, player.getY() + 200 + player.getJumpVelocity() / 100 + cameraVelocity, 0);
+        if (!playerControler.getPlayer().getDie())
+            camera.position.set(IcyTower.SCREEN_WIDTH / 2, playerControler.getPlayer().getY() + 200 + playerControler.getPlayer().getJumpVelocity() / 100 + cameraVelocity, 0);
 
 
-        if (player.getJumpVelocity() == 0)
+        if (playerControler.getPlayer().getJumpVelocity() == 0)
             cameraVelocity += (CAMERA_MOVEMENT_SPEED * Gdx.graphics.getDeltaTime());
 
-        else if (player.getJumpVelocity() < 0)
+        else if (playerControler.getPlayer().getJumpVelocity() < 0)
             cameraVelocity += (CAMERA_MOVEMENT_SPEED * 3 * Gdx.graphics.getDeltaTime());
 
-        else if (player.getJumpVelocity() > 0 && cameraVelocity > 0)
+        else if (playerControler.getPlayer().getJumpVelocity() > 0 && cameraVelocity > 0)
             cameraVelocity -= (CAMERA_MOVEMENT_SPEED * 2 * Gdx.graphics.getDeltaTime());
 
 
-        if (player.getX() > IcyTower.SCREEN_WIDTH)
-            player.setX(-player.getWidth());
+        if (playerControler.getPlayer().getX() > IcyTower.SCREEN_WIDTH)
+            playerControler.getPlayer().setX(-playerControler.getPlayer().getWidth());
 
-        if (player.getX() < -player.getWidth())
-            player.setX(IcyTower.SCREEN_WIDTH);
+        if (playerControler.getPlayer().getX() < -playerControler.getPlayer().getWidth())
+            playerControler.getPlayer().setX(IcyTower.SCREEN_WIDTH);
 
 
-        if (player.getY() + IcyTower.SCREEN_HEIGHT > 5000) {
+        if (playerControler.getPlayer().getY() + IcyTower.SCREEN_HEIGHT > 5000) {
             floor.addAction(Actions.removeActor());
             floor.remove();
 
@@ -282,45 +271,18 @@ public class GameScreen extends AbstractScreen {
     }
 
     private void playerUpdate() {
-        player.update();
+        playerControler.playerUpdate(scoreControler);
         playerDie();
-        playerRotation();
-
-        if (player.getJumpVelocity() < -1200 && !player.getDie()) {
-            player.setDie(true);
-            player.setJump(false);
-            player.setJumpVelocity(800);
-
-            game.getSoundService().pauseTitleSound();
-            game.getSoundService().playDeathSound();
-        }
-
-        if (player.getJumpVelocity() < 0) {
-            scoreControler.setAddPoints(true);
-        }
-    }
-
-    private void playerRotation() {
-        if (player.getRotate()) {
-            if (player.getAngle() >= 360) {
-                player.setAngle(0.0f);
-                player.setRotate(false);
-                player.setFlip(false);
-            }
-
-            anim.setRotation(player.getAngle());
-            player.setAngle(player.getAngle() + 10.25f);
-        }
     }
 
     private void playerDie() {
-        if (player.getDie())
+        if (playerControler.getPlayer().getDie())
             dieTime += Gdx.graphics.getDeltaTime();
 
-        if (!player.getDie() && player.getY() + player.getHeight() < camera.position.y - IcyTower.SCREEN_HEIGHT / 2) {
-            player.setDie(true);
-            player.setJump(false);
-            player.setJumpVelocity(700);
+        if (!playerControler.getPlayer().getDie() && playerControler.getPlayer().getY() + playerControler.getPlayer().getHeight() < camera.position.y - IcyTower.SCREEN_HEIGHT / 2) {
+            playerControler.getPlayer().setDie(true);
+            playerControler.getPlayer().setJump(false);
+            playerControler.getPlayer().setJumpVelocity(700);
 
             game.getSoundService().pauseTitleSound();
             game.getSoundService().playDeathSound();
@@ -329,11 +291,11 @@ public class GameScreen extends AbstractScreen {
             dieTime = 0;
         }
 
-        if (player.getDie()) {
+        if (playerControler.getPlayer().getDie()) {
             if (die) {
                 pauseButton.remove();
 
-                player.setDie(false);
+                playerControler.getPlayer().setDie(false);
                 first = true;
                 die = false;
                 cameraVelocity = 0;
@@ -354,10 +316,10 @@ public class GameScreen extends AbstractScreen {
                 flyingObjectControler.clearObjects();
                 cloudsControler.clearClouds();
 
-                player.addAction(Actions.removeActor());
-                anim.addAction(Actions.removeActor());
+                playerControler.getPlayer().addAction(Actions.removeActor());
+                //anim.addAction(Actions.removeActor());
 
-                camera.position.set(IcyTower.SCREEN_WIDTH / 2, player.getY() + 200 + player.getJumpVelocity() / 100, 0);
+                camera.position.set(IcyTower.SCREEN_WIDTH / 2, playerControler.getPlayer().getY() + 200 + playerControler.getPlayer().getJumpVelocity() / 100, 0);
                 stage.clear();
 
                 if (background != null)
