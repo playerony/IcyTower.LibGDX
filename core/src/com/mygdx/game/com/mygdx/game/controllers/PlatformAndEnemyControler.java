@@ -3,6 +3,7 @@ package com.mygdx.game.com.mygdx.game.controllers;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.mygdx.game.IcyTower;
 import com.mygdx.game.com.mygdx.game.entities.AnimatedImage;
+import com.mygdx.game.com.mygdx.game.entities.Player;
 import com.mygdx.game.com.mygdx.game.screens.MenuScreen;
 
 /**
@@ -25,9 +26,9 @@ public class PlatformAndEnemyControler {
         platformsControler = new PlatformsControler(stage, game);
     }
 
-    public void update(PlayerControler playerControler, ScoreControler scoreControler, AnimatedImage anim, MenuScreen menuScreen) {
-        platformsControler.platformUpdate(playerControler, scoreControler, anim, menuScreen);
-        platformsControler.pipeUpdate(playerControler, scoreControler);
+    public void update(Player player, ScoreControler scoreControler, AnimatedImage anim, MenuScreen menuScreen) {
+        platformsControler.platformUpdate(player, scoreControler, anim, menuScreen);
+        platformsControler.pipeUpdate(player, scoreControler);
     }
 
     public void clearEnemiesAndPlatforms() {
