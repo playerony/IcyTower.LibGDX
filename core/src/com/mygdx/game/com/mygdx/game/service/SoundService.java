@@ -28,7 +28,7 @@ public class SoundService {
     private void init() {
         jumpSound = Gdx.audio.newSound(Gdx.files.internal("assets/jump.wav"));
         titleSound = Gdx.audio.newSound(Gdx.files.internal("assets/backgroundMusic.mp3"));
-        dieSound = Gdx.audio.newSound(Gdx.files.internal("assets/death.wav"));
+        dieSound = Gdx.audio.newSound(Gdx.files.internal("assets/death.mp3"));
         superJumpSound = Gdx.audio.newSound(Gdx.files.internal("assets/superJump.wav"));
         stompSound = Gdx.audio.newSound(Gdx.files.internal("assets/stomp.wav"));
     }
